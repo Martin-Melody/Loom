@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "dgSpecHash": "wiOYw7xm+fVnYhsAQE9Qs74vGP8gNvpsRD/qa6+pOcX5i8NWka5pUt7XP3AgW35WsPICz5gG8Wk4FtemgZrjyA==",
+  "success": true,
+  "projectFilePath": "/home/martin/projects/dotnet/terminal/Loom/src/UI.Terminal/UI.Terminal.csproj",
+  "expectedPackageFiles": [
+    "/home/martin/.nuget/packages/dapper/2.1.66/dapper.2.1.66.nupkg.sha512",
+    "/home/martin/.nuget/packages/microsoft.data.sqlite/9.0.10/microsoft.data.sqlite.9.0.10.nupkg.sha512",
+    "/home/martin/.nuget/packages/microsoft.data.sqlite.core/9.0.10/microsoft.data.sqlite.core.9.0.10.nupkg.sha512",
+    "/home/martin/.nuget/packages/microsoft.dotnet.platformabstractions/3.1.6/microsoft.dotnet.platformabstractions.3.1.6.nupkg.sha512",
+    "/home/martin/.nuget/packages/sqlitepclraw.bundle_e_sqlite3/2.1.10/sqlitepclraw.bundle_e_sqlite3.2.1.10.nupkg.sha512",
+    "/home/martin/.nuget/packages/sqlitepclraw.core/2.1.10/sqlitepclraw.core.2.1.10.nupkg.sha512",
+    "/home/martin/.nuget/packages/sqlitepclraw.lib.e_sqlite3/2.1.10/sqlitepclraw.lib.e_sqlite3.2.1.10.nupkg.sha512",
+    "/home/martin/.nuget/packages/sqlitepclraw.provider.e_sqlite3/2.1.10/sqlitepclraw.provider.e_sqlite3.2.1.10.nupkg.sha512",
+    "/home/martin/.nuget/packages/system.codedom/7.0.0/system.codedom.7.0.0.nupkg.sha512",
+    "/home/martin/.nuget/packages/system.io.abstractions/19.2.29/system.io.abstractions.19.2.29.nupkg.sha512",
+    "/home/martin/.nuget/packages/system.management/7.0.1/system.management.7.0.1.nupkg.sha512",
+    "/home/martin/.nuget/packages/system.memory/4.5.3/system.memory.4.5.3.nupkg.sha512",
+    "/home/martin/.nuget/packages/system.text.encodings.web/7.0.0/system.text.encodings.web.7.0.0.nupkg.sha512",
+    "/home/martin/.nuget/packages/system.text.json/7.0.2/system.text.json.7.0.2.nupkg.sha512",
+    "/home/martin/.nuget/packages/terminal.gui/2.0.0-tags-v2-0-0-alpha-1.1/terminal.gui.2.0.0-tags-v2-0-0-alpha-1.1.nupkg.sha512",
+    "/home/martin/.nuget/packages/testableio.system.io.abstractions/19.2.29/testableio.system.io.abstractions.19.2.29.nupkg.sha512",
+    "/home/martin/.nuget/packages/testableio.system.io.abstractions.wrappers/19.2.29/testableio.system.io.abstractions.wrappers.19.2.29.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "UI.Terminal depends on Terminal.Gui (>= 2.0.0-preview.15) but Terminal.Gui 2.0.0-preview.15 was not found. An approximate best match of Terminal.Gui 2.0.0-tags-v2-0-0-alpha-1.1 was resolved.",
+      "libraryId": "Terminal.Gui",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
+}
