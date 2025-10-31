@@ -4,6 +4,7 @@ using Loom.Infrastructure.Persistence.Json;
 using Loom.Infrastructure.Time;
 using Loom.UI.Terminal.Controllers;
 using Loom.UI.Terminal.Theme;
+using Loom.UI.Terminal.Windows;
 using Terminal.Gui;
 
 using TuiApp = Terminal.Gui.Application;
@@ -33,29 +34,30 @@ public static class Program
         // --- Initialise Terminal.Gui ---
         TuiApp.Init();
         LoomTheme.ApplyDarkTheme();
+        TuiApp.Run(new DashboardWindow());
 
         // --- Build UI ---
-        var listView = new ListView
-        {
-            X = 1,
-            Y = 1,
-            Width = Dim.Fill() - 2,
-            Height = Dim.Fill() - 2
-        };
-
-        var controller = new TaskListController(
-            listView,
-            createTask,
-            editTask,
-            deleteTask,
-            completeTask,
-            filterTasks
-        );
-
-        var window = new MainWindow(controller, listView);
+        // var listView = new ListView
+        // {
+        //     X = 1,
+        //     Y = 1,
+        //     Width = Dim.Fill() - 2,
+        //     Height = Dim.Fill() - 2
+        // };
+        //
+        // var controller = new TaskListController(
+        //     listView,
+        //     createTask,
+        //     editTask,
+        //     deleteTask,
+        //     completeTask,
+        //     filterTasks
+        // );
+        //
+        // var window = new MainWindow(controller, listView);
 
         // --- Run ---
-        TuiApp.Run(window);
+        // TuiApp.Run(window);
         TuiApp.Shutdown();
     }
 }
