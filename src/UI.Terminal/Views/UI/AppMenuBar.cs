@@ -100,6 +100,18 @@ public static class AppMenuBar
                         ),
                     }
                 ),
+                // --- TOOLS ---
+                new MenuBarItem(
+                    "_Tools",
+                    new[]
+                    {
+                        new MenuItem(
+                            "_Command Palette (Ctrl+P)",
+                            "",
+                            async () => await appController.ShowCommandPaletteAsync()
+                        ),
+                    }
+                ),
             },
         };
     }

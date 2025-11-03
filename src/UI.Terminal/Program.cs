@@ -2,6 +2,7 @@ using Loom.Application.Interfaces;
 using Loom.Application.UseCases.Tasks;
 using Loom.Infrastructure.Persistence;
 using Loom.Infrastructure.Persistence.Json;
+using Loom.Infrastructure.Services;
 using Loom.Infrastructure.Time;
 using Loom.UI.Terminal.Controllers;
 using Loom.UI.Terminal.Theme;
@@ -72,7 +73,16 @@ public static class Program
             BorderStyle = LineStyle.None,
         };
 
-        var appController = new AppController(dashboardWindow, taskListWindow, mainContent);
+        var commandRegistry = new CommandRegistry();
+
+        var appController = new AppController(
+            dashboardWindow,
+            taskListWindow,
+            mainContent,
+            commandRegistry
+        );
+        appController.RegisterCommands(taskController);
+
         var menuBar = AppMenuBar.Create(taskController, appController, configRepo);
 
         top.Add(menuBar, mainContent);
