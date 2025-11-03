@@ -1,4 +1,3 @@
-// File: Views/UI/AppMenuBar.cs
 using Loom.Application.DTOs.Tasks;
 using Loom.UI.Terminal.Controllers;
 using Terminal.Gui;
