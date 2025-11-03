@@ -1,5 +1,6 @@
 using Loom.Application.Interfaces;
 using Loom.Application.UseCases.Tasks;
+using Loom.Infrastructure.Persistence;
 using Loom.Infrastructure.Persistence.Json;
 using Loom.Infrastructure.Time;
 using Loom.UI.Terminal.Controllers;
@@ -13,13 +14,16 @@ namespace Loom.UI.Terminal;
 
 public static class Program
 {
-    public static void Main()
+    public static async Task Main()
     {
         // --- Composition Root (manual DI) ---
         var dataDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".loom"
         );
+
+        var configRepo = new ConfigRepository();
+        var config = await configRepo.LoadAsync();
 
         var tasksRepo = new JsonTaskRepository(dataDir);
         IUnitOfWork uow = new JsonUnitOfWork(tasksRepo);
@@ -69,15 +73,22 @@ public static class Program
         };
 
         var appController = new AppController(dashboardWindow, taskListWindow, mainContent);
-        var menuBar = AppMenuBar.Create(taskController, appController);
+        var menuBar = AppMenuBar.Create(taskController, appController, configRepo);
 
         top.Add(menuBar, mainContent);
 
-        // Start on dashboard
-        appController.ShowDashboard();
+        // --- Start with last open view ---
+        if (config.LastOpenView == nameof(TaskListWindow).Replace("Window", ""))
+            appController.ShowTasks();
+        else
+            appController.ShowDashboard();
 
         // --- Run ---
         TuiApp.Run(top);
         TuiApp.Shutdown();
+
+        // --- Save config on exit ---
+        config.LastOpenView = appController.CurrentViewName;
+        await configRepo.SaveAsync(config);
     }
 }
