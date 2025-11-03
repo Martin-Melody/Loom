@@ -59,7 +59,7 @@ public static class Program
         // --- Root View ---
         var top = Toplevel.Create();
 
-        var mainContent = new FrameView()
+        var mainContent = new FrameView
         {
             X = 0,
             Y = 1,
@@ -69,11 +69,12 @@ public static class Program
         };
 
         var appController = new AppController(dashboardWindow, taskListWindow, mainContent);
-
         var menuBar = AppMenuBar.Create(taskController, appController);
+
         top.Add(menuBar, mainContent);
 
-        mainContent.Add(dashboardWindow);
+        // Start on dashboard
+        appController.ShowDashboard();
 
         // --- Run ---
         TuiApp.Run(top);

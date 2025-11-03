@@ -17,15 +17,7 @@ public static class AppMenuBar
                 // --- FILE ---
                 new MenuBarItem(
                     "_File",
-                    new[]
-                    {
-                        new MenuItem(
-                            "_Refresh (r)",
-                            "",
-                            async () => await taskController.LoadTasks(taskController.CurrentFilter)
-                        ),
-                        new MenuItem("_Quit (q)", "", () => TuiApp.RequestStop()),
-                    }
+                    new[] { new MenuItem("_Quit (q)", "", () => TuiApp.RequestStop()) }
                 ),
                 // --- TASKS ---
                 new MenuBarItem(

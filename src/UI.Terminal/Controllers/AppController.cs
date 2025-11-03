@@ -21,24 +21,20 @@ public class AppController
 
     private void AddNavigationKeys()
     {
-        // Switch to Dashboard (Ctrl+D)
-        _taskList.KeyPress += (_, args) =>
+        TuiApp.RootKeyEvent = (keyEvent) =>
         {
-            if (args.KeyEvent.Key == (Key.CtrlMask | Key.D))
+            if (keyEvent.Key == (Key.CtrlMask | Key.D))
             {
                 ShowDashboard();
-                args.Handled = true;
+                return true;
             }
-        };
-
-        // Switch to TaskList (Ctrl+T)
-        _dashboard.KeyPress += (_, args) =>
-        {
-            if (args.KeyEvent.Key == (Key.CtrlMask | Key.T))
+            else if (keyEvent.Key == (Key.CtrlMask | Key.T))
             {
                 ShowTasks();
-                args.Handled = true;
+                return true;
             }
+
+            return false;
         };
     }
 
@@ -46,6 +42,7 @@ public class AppController
     {
         _mainContent.RemoveAll();
         _mainContent.Add(_dashboard);
+        _dashboard.FocusFirst();
         TuiApp.Refresh();
     }
 
@@ -53,6 +50,7 @@ public class AppController
     {
         _mainContent.RemoveAll();
         _mainContent.Add(_taskList);
+        _taskList.FocusFirst();
         TuiApp.Refresh();
     }
 }

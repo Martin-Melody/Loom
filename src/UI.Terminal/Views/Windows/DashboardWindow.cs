@@ -1,3 +1,4 @@
+using Loom.UI.Terminal.Views.Widgets;
 using Terminal.Gui;
 
 namespace Loom.UI.Terminal.Views.Windows;
@@ -9,27 +10,30 @@ public class DashboardWindow : Window
         Title = "Loom — Dashboard";
         Border.BorderStyle = LineStyle.None;
 
-        // Example layout
-        var widget1 = new FrameView("Widget 1")
+        CanFocus = true;
+        TabStop = false;
+        WantMousePositionReports = true;
+
+        // Widgets
+        var tasksWidget = new TaskSummaryExampleWidget
         {
             X = 1,
             Y = 1,
             Width = 40,
             Height = 10,
-            BorderStyle = LineStyle.Rounded,
         };
 
-        var widget2 = new FrameView("Widget 2")
+        var statsWidget = new TaskSummaryExampleWidget
         {
-            X = Pos.Right(widget1) + 2,
+            Title = "Stats Overview",
+            X = Pos.Right(tasksWidget) + 2,
             Y = 1,
             Width = 40,
             Height = 10,
-            BorderStyle = LineStyle.Rounded,
         };
 
-        Add(widget1, widget2);
+        Add(tasksWidget, statsWidget);
 
-        Add(new Label("Press Ctrl+T to view Tasks") { X = 2, Y = Pos.Bottom(widget1) + 1 });
+        Add(new Label("Press Ctrl+T to view Tasks") { X = 2, Y = Pos.Bottom(tasksWidget) + 1 });
     }
 }
