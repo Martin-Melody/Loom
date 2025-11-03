@@ -9,3 +9,15 @@
 /home/martin/projects/dotnet/terminal/Loom/src/Core/obj/Debug/net8.0/refint/Core.dll
 /home/martin/projects/dotnet/terminal/Loom/src/Core/obj/Debug/net8.0/Core.pdb
 /home/martin/projects/dotnet/terminal/Loom/src/Core/obj/Debug/net8.0/ref/Core.dll
+/home/martin/Projects/dotnet/Loom/src/Core/bin/Debug/net8.0/Core.deps.json
+/home/martin/Projects/dotnet/Loom/src/Core/bin/Debug/net8.0/Core.dll
+/home/martin/Projects/dotnet/Loom/src/Core/bin/Debug/net8.0/Core.pdb
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/Core.GeneratedMSBuildEditorConfig.editorconfig
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/Core.AssemblyInfoInputs.cache
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/Core.AssemblyInfo.cs
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/Core.csproj.CoreCompileInputs.cache
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/Core.sourcelink.json
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/Core.dll
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/refint/Core.dll
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/Core.pdb
+/home/martin/Projects/dotnet/Loom/src/Core/obj/Debug/net8.0/ref/Core.dll

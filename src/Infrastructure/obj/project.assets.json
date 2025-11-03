@@ -405,11 +405,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/martin/projects/dotnet/terminal/Loom/src/Infrastructure/Infrastructure.csproj",
+      "projectUniqueName": "/home/martin/Projects/dotnet/Loom/src/Infrastructure/Infrastructure.csproj",
       "projectName": "Infrastructure",
-      "projectPath": "/home/martin/projects/dotnet/terminal/Loom/src/Infrastructure/Infrastructure.csproj",
+      "projectPath": "/home/martin/Projects/dotnet/Loom/src/Infrastructure/Infrastructure.csproj",
       "packagesPath": "/home/martin/.nuget/packages/",
-      "outputPath": "/home/martin/projects/dotnet/terminal/Loom/src/Infrastructure/obj/",
+      "outputPath": "/home/martin/Projects/dotnet/Loom/src/Infrastructure/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/martin/.nuget/NuGet/NuGet.Config"
@@ -424,11 +424,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "/home/martin/projects/dotnet/terminal/Loom/src/Application/Application.csproj": {
-              "projectPath": "/home/martin/projects/dotnet/terminal/Loom/src/Application/Application.csproj"
+            "/home/martin/Projects/dotnet/Loom/src/Application/Application.csproj": {
+              "projectPath": "/home/martin/Projects/dotnet/Loom/src/Application/Application.csproj"
             },
-            "/home/martin/projects/dotnet/terminal/Loom/src/Core/Core.csproj": {
-              "projectPath": "/home/martin/projects/dotnet/terminal/Loom/src/Core/Core.csproj"
+            "/home/martin/Projects/dotnet/Loom/src/Core/Core.csproj": {
+              "projectPath": "/home/martin/Projects/dotnet/Loom/src/Core/Core.csproj"
             }
           }
         }
@@ -437,7 +437,13 @@
         "warnAsError": [
           "NU1605"
         ]
-      }
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net8.0": {
@@ -463,12 +469,22 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.20, 8.0.20]"
+          }
+        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.121/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/9.0.110/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

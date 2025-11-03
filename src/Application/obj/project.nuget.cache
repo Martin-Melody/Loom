@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "BiX6Vx+3jAlr8MHiqtyK6UTENhjh9tdg3RwmWbgv/SzFctgW0Y3P+yi/vqwACuMwGaXFu7UZ8rJAXLZxTO68Zw==",
+  "dgSpecHash": "J2RaH4CFnhk=",
   "success": true,
-  "projectFilePath": "/home/martin/projects/dotnet/terminal/Loom/src/Application/Application.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/home/martin/Projects/dotnet/Loom/src/Application/Application.csproj",
+  "expectedPackageFiles": [
+    "/home/martin/.nuget/packages/microsoft.netcore.app.ref/8.0.20/microsoft.netcore.app.ref.8.0.20.nupkg.sha512",
+    "/home/martin/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.20/microsoft.aspnetcore.app.ref.8.0.20.nupkg.sha512"
+  ],
   "logs": []
 }
