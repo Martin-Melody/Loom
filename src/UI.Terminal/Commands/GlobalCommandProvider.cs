@@ -1,5 +1,5 @@
 using Loom.Application.Interfaces;
-using LoomCommand = Loom.Core.Entities.Command;
+using Loom.Core.Entities;
 
 namespace Loom.UI.Terminal.Commands;
 
@@ -26,9 +26,9 @@ public class GlobalCommandProvider : ICommandProvider
         _showTasks = showTasks;
     }
 
-    public IEnumerable<LoomCommand> GetCommands()
+    public IEnumerable<Command> GetCommands()
     {
-        yield return new LoomCommand(
+        yield return new Command(
             "command.palette",
             "Open Command Palette",
             "Global",
@@ -36,7 +36,7 @@ public class GlobalCommandProvider : ICommandProvider
             "ctrl+p"
         );
 
-        yield return new LoomCommand(
+        yield return new Command(
             "app.quit",
             "Quit Application",
             "Global",
@@ -48,7 +48,7 @@ public class GlobalCommandProvider : ICommandProvider
             "ctrl+q"
         );
 
-        yield return new LoomCommand(
+        yield return new Command(
             "nav.dashboard",
             "Open Dashboard",
             "Navigation",
@@ -56,12 +56,6 @@ public class GlobalCommandProvider : ICommandProvider
             "ctrl+d"
         );
 
-        yield return new LoomCommand(
-            "nav.tasks",
-            "Open Task List",
-            "Navigation",
-            _showTasks,
-            "ctrl+t"
-        );
+        yield return new Command("nav.tasks", "Open Task List", "Navigation", _showTasks, "ctrl+t");
     }
 }
