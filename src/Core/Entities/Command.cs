@@ -9,7 +9,7 @@ public class Command
     public Func<Task> Action { get; set; }
 
     public Command(
-        Guid id,
+        string id,
         string name,
         string category,
         Func<Task> action,
