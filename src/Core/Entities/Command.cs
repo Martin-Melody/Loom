@@ -2,7 +2,7 @@ namespace Loom.Core.Entities;
 
 public class Command
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public string? Shortcut { get; set; }
