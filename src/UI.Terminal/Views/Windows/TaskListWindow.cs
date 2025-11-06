@@ -1,3 +1,4 @@
+using Loom.Application.Interfaces;
 using Loom.UI.Terminal.Controllers;
 using Loom.UI.Terminal.Input;
 using Terminal.Gui;
@@ -9,7 +10,11 @@ public sealed class TaskListWindow : Window
     private readonly TaskListController _controller;
     private readonly ListView _list;
 
-    public TaskListWindow(TaskListController controller, ListView list)
+    public TaskListWindow(
+        TaskListController controller,
+        ListView list,
+        ICommandRegistry commandRegistry
+    )
     {
         _controller = controller;
         _list = list;
@@ -30,7 +35,7 @@ public sealed class TaskListWindow : Window
         listFrame.Add(_list);
         Add(listFrame);
 
-        new TaskListKeyHandler(_controller, _list).Attach();
+        new TaskListKeyHandler(list, commandRegistry).Attach();
         _ = _controller.LoadTasks();
 
         _controller.ViewLabelChanged += label => listFrame.Title = $"Tasks — {label}";

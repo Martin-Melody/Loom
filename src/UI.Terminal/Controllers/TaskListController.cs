@@ -1,9 +1,10 @@
-using Terminal.Gui;
+using Loom.Application.DTOs.Tasks;
 using Loom.Application.UseCases.Tasks;
+using Loom.Core.Entities;
 using Loom.UI.Terminal.Views;
 using Loom.UI.Terminal.Views.Dialogs;
+using Terminal.Gui;
 using TuiApp = Terminal.Gui.Application;
-using Loom.Application.DTOs.Tasks;
 
 namespace Loom.UI.Terminal.Controllers;
 
@@ -20,18 +21,16 @@ public class TaskListController
 
     private TaskFilter? _currentFilter;
     public TaskFilter? CurrentFilter => _currentFilter;
-
+    public bool HasSelection => _list.SelectedItem >= 0;
     public event Action<string>? ViewLabelChanged;
+
     public string CurrentViewLabel =>
-    _currentFilter == null
-        ? "Today’s Tasks"
+        _currentFilter == null ? "Today’s Tasks"
         : string.IsNullOrEmpty(_currentFilter.TextContains)
-          && _currentFilter.DueBefore == null
-          && _currentFilter.IsComplete == null
+        && _currentFilter.DueBefore == null
+        && _currentFilter.IsComplete == null
             ? "All Tasks"
-            : "Filtered Tasks";
-
-
+        : "Filtered Tasks";
 
     public TaskListController(
         ListView list,
@@ -39,7 +38,8 @@ public class TaskListController
         EditTask editTask,
         DeleteTask deleteTask,
         ToggleCompleteTask toggleComplete,
-        FilterTasks filterTasks)
+        FilterTasks filterTasks
+    )
     {
         _list = list;
         _createTask = createTask;
@@ -49,25 +49,31 @@ public class TaskListController
         _filterTasks = filterTasks;
     }
 
-
+    // === Load & Refresh ===
     public async Task LoadTasks(TaskFilter? filter = null)
     {
         _currentFilter = filter;
         var items = await _filterTasks.Handle(filter);
+        UpdateViews(items);
+    }
+
+    private async Task ReloadAsync()
+    {
+        await LoadTasks(_currentFilter);
+    }
+
+    private void UpdateViews(IEnumerable<TaskItem> items)
+    {
         _views = items.Select(it => new TaskView(it)).ToList();
         RefreshList();
         ViewLabelChanged?.Invoke(CurrentViewLabel);
-    }
-
-    private async Task RefreshCurrentView()
-    {
-        await LoadTasks(_currentFilter);
     }
 
     public void RefreshList(int? previousIndex = null)
     {
         var oldIndex = previousIndex ?? _list.SelectedItem;
         var rendered = _views.SelectMany(v => v.RenderLines()).ToList();
+
         _list.SetSource(rendered);
 
         if (rendered.Count == 0)
@@ -80,6 +86,7 @@ public class TaskListController
         _list.SetFocus();
     }
 
+    // === Dialogs & Commands ===
     public async Task FilterTasks()
     {
         var dlg = new FilterTasksDialog();
@@ -89,71 +96,82 @@ public class TaskListController
             return;
 
         _currentFilter = dlg.Filter;
-
         var filtered = await _filterTasks.Handle(dlg.Filter);
-        _views = filtered.Select(it => new TaskView(it)).ToList();
-        RefreshList();
-
-        ViewLabelChanged?.Invoke(CurrentViewLabel);
+        UpdateViews(filtered);
     }
 
+    // TODO: Wrap these async method in Try-Catch Block to catch errors.
     public async Task AddTask()
     {
         var dlg = new AddTaskDialog(_createTask);
         TuiApp.Run(dlg);
+
         if (dlg.TaskCreated)
-            await RefreshCurrentView();
+            await ReloadAsync();
     }
 
     public async Task EditSelectedTask()
     {
-        if (_list.SelectedItem < 0) return;
-
-        var selected = FindTaskAtIndex(_list.SelectedItem);
-        if (selected is null) return;
+        if (!TryGetSelected(out var selected))
+            return;
 
         var dlg = new EditTaskDialog(_editTask, selected.Item);
         TuiApp.Run(dlg);
+
         if (dlg.TaskUpdated)
-            await RefreshCurrentView();
+            await ReloadAsync();
     }
 
     public async Task DeleteSelectedTask()
     {
-        if (_list.SelectedItem < 0) return;
+        if (!TryGetSelected(out var selected))
+            return;
 
-        var confirm = MessageBox.Query("Confirm Delete",
+        var confirm = MessageBox.Query(
+            "Confirm Delete",
             "Are you sure you want to delete this task?",
-            "Yes", "No");
+            "Yes",
+            "No"
+        );
 
-        if (confirm == 0)
-        {
-            var selected = FindTaskAtIndex(_list.SelectedItem);
-            if (selected is null) return;
+        if (confirm != 0)
+            return;
 
-            await _deleteTask.Handle(selected.Item.Id);
-            await RefreshCurrentView();
-        }
+        await _deleteTask.Handle(selected.Item.Id);
+        await ReloadAsync();
     }
 
     public async Task ToggleCompleteSelected()
     {
-        if (_list.SelectedItem < 0) return;
-
-        var selected = FindTaskAtIndex(_list.SelectedItem);
-        if (selected is null) return;
+        if (!TryGetSelected(out var selected))
+            return;
 
         await _toggleComplete.Handle(selected.Item.Id);
-        await RefreshCurrentView();
+        await ReloadAsync();
     }
 
+    // === View Interaction ===
     public void ToggleExpandCollapse()
     {
-        var selected = FindTaskAtIndex(_list.SelectedItem);
-        if (selected is null) return;
+        if (!TryGetSelected(out var selected))
+            return;
 
         selected.IsExpanded = !selected.IsExpanded;
         RefreshList(_list.SelectedItem);
+    }
+
+    private bool TryGetSelected(out TaskView selected)
+    {
+        selected = null!;
+        if (_list.SelectedItem < 0)
+            return false;
+
+        var found = FindTaskAtIndex(_list.SelectedItem);
+        if (found is null)
+            return false;
+
+        selected = found;
+        return true;
     }
 
     private TaskView? FindTaskAtIndex(int index)
@@ -171,4 +189,3 @@ public class TaskListController
 
     public IReadOnlyList<TaskView> Views => _views;
 }
-
