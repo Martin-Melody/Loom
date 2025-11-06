@@ -1,6 +1,6 @@
 using Loom.Application.Interfaces;
+using Loom.Core.Entities;
 using Terminal.Gui;
-using LoomCommand = Loom.Core.Entities.Command;
 using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Views.Dialogs;
@@ -9,13 +9,14 @@ public sealed class CommandPaletteDialog : Dialog
 {
     private readonly TextField _searchBox = null!;
     private readonly ListView _listView = null!;
-    private readonly List<LoomCommand> _filtered;
+    private readonly List<CommandDefinition> _filtered;
     private readonly ICommandRegistry _registry;
+    private CommandDefinition? _selectedCommand;
 
     public CommandPaletteDialog(ICommandRegistry registry)
     {
         _registry = registry;
-        _filtered = _registry.GetAll().ToList();
+        _filtered = LoadCommands(string.Empty);
 
         Title = "Command Palette";
         Width = 60;
@@ -43,18 +44,21 @@ public sealed class CommandPaletteDialog : Dialog
 
         // --- Buttons ---
         var runButton = new Button("Run") { IsDefault = true };
-        runButton.Clicked += async (_, __) =>
+        runButton.Clicked += (_, __) =>
         {
             if (_listView.SelectedItem < 0)
                 return;
 
-            var command = _filtered[_listView.SelectedItem];
-            TuiApp.RequestStop();
-            await command.Action();
+            _selectedCommand = _filtered[_listView.SelectedItem];
+            TuiApp.RequestStop(this);
         };
 
         var cancelButton = new Button("Cancel");
-        cancelButton.Clicked += (_, __) => TuiApp.RequestStop();
+        cancelButton.Clicked += (_, __) =>
+        {
+            _selectedCommand = null;
+            TuiApp.RequestStop(this);
+        };
 
         AddButton(runButton);
         AddButton(cancelButton);
@@ -63,20 +67,28 @@ public sealed class CommandPaletteDialog : Dialog
     private void OnSearchChanged(object? sender, TextChangedEventArgs e)
     {
         var text = _searchBox.Text?.ToString() ?? string.Empty;
-        _filtered.Clear();
+        var commands = LoadCommands(text);
 
-        foreach (
-            var c in _registry
-                .GetAll()
-                .Where(c =>
-                    c.Name.Contains(text, StringComparison.OrdinalIgnoreCase)
-                    || c.Category.Contains(text, StringComparison.OrdinalIgnoreCase)
-                )
-        )
+        _filtered.Clear();
+        _filtered.AddRange(commands);
+        _listView.SetSource(_filtered);
+        _listView.SelectedItem = _filtered.Count > 0 ? 0 : -1;
+    }
+
+    private List<CommandDefinition> LoadCommands(string search)
+    {
+        IEnumerable<CommandDefinition> commands = _registry.GetAll().Where(c => c.IsEnabled);
+
+        if (!string.IsNullOrWhiteSpace(search))
         {
-            _filtered.Add(c);
+            commands = commands.Where(c =>
+                c.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
+                || c.Category.Contains(search, StringComparison.OrdinalIgnoreCase)
+            );
         }
 
-        _listView.SetSource(_filtered);
+        return commands.OrderBy(c => c.Category).ThenBy(c => c.Name).ToList();
     }
+
+    public CommandDefinition? SelectedCommand => _selectedCommand;
 }
