@@ -11,6 +11,10 @@ public static class CommandIds
     {
         public const string ShowDashboard = "navigation.dashboard";
         public const string ShowTasks = "navigation.tasks";
+        public const string ShowDay = "navigation.day";
+        public const string ShowWeek = "navigation.week";
+        public const string ShowMonth = "navigation.month";
+        public const string ShowYear = "navigation.year";
     }
 
     public static class Tasks

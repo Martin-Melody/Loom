@@ -31,6 +31,39 @@ public static class GlobalCommandDefinitions
                 shortcut: "Ctrl+T",
                 isGlobalShortcut: true
             ),
+            //TODO: Change these shortcuts as Terminal GUI can't see them
+            new CommandDefinition(
+                CommandIds.Navigation.ShowDay,
+                "Open Day View",
+                "Navigation",
+                app.ShowDay,
+                shortcut: "Ctrl+1",
+                isGlobalShortcut: true
+            ),
+            new CommandDefinition(
+                CommandIds.Navigation.ShowWeek,
+                "Open Week View",
+                "Navigation",
+                app.ShowWeek,
+                shortcut: "Ctrl+2",
+                isGlobalShortcut: true
+            ),
+            new CommandDefinition(
+                CommandIds.Navigation.ShowMonth,
+                "Open Month View",
+                "Navigation",
+                app.ShowMonth,
+                shortcut: "Ctrl+3",
+                isGlobalShortcut: true
+            ),
+            new CommandDefinition(
+                CommandIds.Navigation.ShowYear,
+                "Open Year View",
+                "Navigation",
+                app.ShowYear,
+                shortcut: "Ctrl+4",
+                isGlobalShortcut: true
+            ),
             new CommandDefinition(
                 CommandIds.Settings.SaveConfig,
                 "Save Configuration",

@@ -65,6 +65,10 @@ public static class Program
 
         var taskListWindow = new TaskListWindow(taskController, listView, commandRegistry);
         var dashboardWindow = new DashboardWindow();
+        var dayViewWindow = new DayViewWindow();
+        var WeekViewWindow = new WeekViewWindow();
+        var MonthViewWindow = new MonthViewWindow();
+        var YearViewWindow = new YearViewWindow();
 
         var dashboardController = new DashboardController(widgetManager, dashboardWindow);
 
@@ -83,6 +87,10 @@ public static class Program
         var appController = new AppController(
             dashboardWindow,
             taskListWindow,
+            dayViewWindow,
+            WeekViewWindow,
+            MonthViewWindow,
+            YearViewWindow,
             mainContent,
             commandRegistry
         );
