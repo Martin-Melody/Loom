@@ -2,24 +2,32 @@ using Terminal.Gui;
 
 namespace Loom.UI.Terminal.Views.Widgets;
 
-public abstract class BaseWidget : FrameView
+public abstract class BaseWidget : FrameView, IWidget
 {
     private readonly Dictionary<Key, Action> _keyBindings = new();
+    private bool _isFocused;
+
+    public bool IsFocused => _isFocused;
 
     protected BaseWidget(string title)
         : base(title)
     {
         Border.BorderStyle = LineStyle.Rounded;
         CanFocus = true;
-
-        // Set base appearance using theme
         ColorScheme = Colors.Base;
 
-        // Handle focus/blur
-        Enter += (_, _) => OnFocus();
-        Leave += (_, _) => OnBlur();
+        Enter += (_, _) =>
+        {
+            _isFocused = true;
+            OnFocus();
+        };
 
-        // Handle key presses only while focused
+        Leave += (_, _) =>
+        {
+            _isFocused = false;
+            OnBlur();
+        };
+
         KeyPress += (_, e) =>
         {
             if (_keyBindings.TryGetValue(e.KeyEvent.Key, out var handler))
@@ -29,20 +37,17 @@ public abstract class BaseWidget : FrameView
             }
         };
 
-        // Optional: focus by mouse click anywhere in the widget
         MouseClick += (_, _) => SetFocus();
     }
 
     protected virtual void OnFocus()
     {
-        // Use the theme’s focus color scheme
-        ColorScheme = Colors.Dialog; // slightly brighter green accent in your theme
+        ColorScheme = Colors.Dialog;
         SetNeedsDisplay();
     }
 
     protected virtual void OnBlur()
     {
-        // Revert to normal base scheme
         ColorScheme = Colors.Base;
         SetNeedsDisplay();
     }
@@ -51,6 +56,8 @@ public abstract class BaseWidget : FrameView
     {
         _keyBindings[key] = handler;
     }
+
+    public View Render() => this;
 
     public abstract void Refresh();
 }

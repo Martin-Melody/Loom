@@ -32,8 +32,15 @@ public class DashboardWindow : Window
             Height = 10,
         };
 
-        Add(tasksWidget, statsWidget);
+        var testWidget = new TaskSummaryExampleWidget
+        {
+            Title = "test widget",
+            X = Pos.Right(statsWidget) + 2,
+            Y = 1,
+            Width = 40,
+            Height = 10,
+        };
 
-        Add(new Label("Press Ctrl+T to view Tasks") { X = 2, Y = Pos.Bottom(tasksWidget) + 1 });
+        Add(tasksWidget, statsWidget, testWidget);
     }
 }
