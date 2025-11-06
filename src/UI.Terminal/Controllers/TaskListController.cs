@@ -10,7 +10,7 @@ namespace Loom.UI.Terminal.Controllers;
 
 public class TaskListController
 {
-    private readonly CreateTask _createTask;
+    private readonly AddTask _addTask;
     private readonly EditTask _editTask;
     private readonly DeleteTask _deleteTask;
     private readonly ToggleCompleteTask _toggleComplete;
@@ -34,7 +34,7 @@ public class TaskListController
 
     public TaskListController(
         ListView list,
-        CreateTask createTask,
+        AddTask addTask,
         EditTask editTask,
         DeleteTask deleteTask,
         ToggleCompleteTask toggleComplete,
@@ -42,7 +42,7 @@ public class TaskListController
     )
     {
         _list = list;
-        _createTask = createTask;
+        _addTask = addTask;
         _editTask = editTask;
         _deleteTask = deleteTask;
         _toggleComplete = toggleComplete;
@@ -103,7 +103,7 @@ public class TaskListController
     // TODO: Wrap these async method in Try-Catch Block to catch errors.
     public async Task AddTask()
     {
-        var dlg = new AddTaskDialog(_createTask);
+        var dlg = new AddTaskDialog(_addTask);
         TuiApp.Run(dlg);
 
         if (dlg.TaskCreated)

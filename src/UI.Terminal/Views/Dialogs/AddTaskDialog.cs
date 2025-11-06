@@ -1,53 +1,125 @@
-using Terminal.Gui;
 using Loom.Application.UseCases.Tasks;
+using Loom.Core.Entities;
+using Terminal.Gui;
 using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Views.Dialogs;
 
 public class AddTaskDialog : Dialog
 {
-    private readonly CreateTask _createTask;
+    private readonly AddTask _addTask;
 
     private readonly TextField _titleField;
-    private readonly Button _okButton;
+    private readonly TextView _notesView;
+    private readonly TextField _dueField;
+
+    private readonly Button _saveButton;
     private readonly Button _cancelButton;
 
     public bool TaskCreated { get; private set; } = false;
+    public TaskItem? CreatedTask { get; private set; }
 
-    public AddTaskDialog(CreateTask createTask) : base()
+    public AddTaskDialog(AddTask addTask)
+        : base()
     {
-        _createTask = createTask;
+        Title = "Add New Task";
+        Height = 18;
+        Width = 60;
+        Border.BorderStyle = LineStyle.Heavy;
+        _addTask = addTask;
 
+        // === Title ===
         var lblTitle = new Label("Title:") { X = 1, Y = 1 };
-        _titleField = new TextField { X = 10, Y = 1, Width = Dim.Fill() - 2 };
+        _titleField = new TextField()
+        {
+            X = 12,
+            Y = 1,
+            Width = Dim.Fill() - 2,
+        };
 
-        _okButton = new Button("OK")
+        // === Notes ===
+        var lblNotes = new Label("Notes:") { X = 1, Y = 3 };
+        _notesView = new TextView()
+        {
+            X = 12,
+            Y = 3,
+            Width = Dim.Fill() - 2,
+            Height = 5,
+            AllowsTab = false,
+        };
+
+        //TODO: make a note of those keybind somwhere for the user
+        _notesView.KeyDown += (_, args) =>
+        {
+            if (args.KeyEvent.Key == (Key.CtrlMask | Key.T))
+            {
+                _notesView.InsertText("    ");
+                args.Handled = true;
+            }
+        };
+
+        // === Due Date ===
+        var lblDue = new Label("Due (yyyy-mm-dd):") { X = 1, Y = 9 };
+        _dueField = new TextField(DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd"))
+        {
+            X = 22,
+            Y = 9,
+            Width = 15,
+        };
+
+        // === Buttons ===
+        _saveButton = new Button("Create")
         {
             IsDefault = true,
-            X = Pos.Center() - 10,
-            Y = Pos.Bottom(_titleField) + 2
+            X = Pos.Center() - 12,
+            Y = Pos.Bottom(_dueField) + 2,
         };
 
         _cancelButton = new Button("Cancel")
         {
-            X = Pos.Center() + 2,
-            Y = Pos.Bottom(_titleField) + 2
+            X = Pos.Center() + 4,
+            Y = Pos.Bottom(_dueField) + 2,
         };
 
-        _okButton.Clicked += async (_, __) =>
+        // === Save Logic ===
+        _saveButton.Clicked += async (_, __) =>
         {
-            var title = _titleField.Text.ToString() ?? "";
-            if (!string.IsNullOrWhiteSpace(title))
+            var title = _titleField.Text.ToString()?.Trim() ?? "";
+            var notes = _notesView.Text.ToString()?.Trim();
+            DateOnly? due = null;
+
+            if (string.IsNullOrWhiteSpace(title))
             {
-                await _createTask.Handle(title, null, DateOnly.FromDateTime(DateTime.UtcNow));
-                TaskCreated = true;
-                TuiApp.RequestStop(this);
+                MessageBox.ErrorQuery("Invalid Input", "Title is required.", "OK");
+                return;
             }
+
+            if (DateOnly.TryParse(_dueField.Text.ToString(), out var parsedDue))
+                due = parsedDue;
+
+            var task = await _addTask.Handle(title, notes, due);
+            CreatedTask = task;
+            TaskCreated = true;
+
+            TuiApp.RequestStop(this);
         };
 
+        // === Cancel Logic ===
         _cancelButton.Clicked += (_, __) => TuiApp.RequestStop(this);
 
-        Add(lblTitle, _titleField, _okButton, _cancelButton);
+        // === Add Views ===
+        Add(
+            lblTitle,
+            _titleField,
+            lblNotes,
+            _notesView,
+            lblDue,
+            _dueField,
+            _saveButton,
+            _cancelButton
+        );
+
+        // === Focus ===
+        _titleField.SetFocus();
     }
 }
-

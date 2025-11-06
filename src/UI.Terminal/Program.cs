@@ -31,7 +31,7 @@ public static class Program
         IUnitOfWork uow = new JsonUnitOfWork(tasksRepo);
         IDateTimeProvider clock = new SystemClock();
 
-        var createTask = new CreateTask(tasksRepo, uow);
+        var createTask = new AddTask(tasksRepo, uow);
         var editTask = new EditTask(tasksRepo, uow);
         var filterTasks = new FilterTasks(tasksRepo, clock);
         var deleteTask = new DeleteTask(tasksRepo, uow);
