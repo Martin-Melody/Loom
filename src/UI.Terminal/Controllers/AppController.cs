@@ -2,10 +2,8 @@ using Loom.Application.Interfaces;
 using Loom.Infrastructure.Persistence;
 using Loom.UI.Terminal.Commands;
 using Loom.UI.Terminal.Input;
-using Loom.UI.Terminal.Views.Dialogs;
 using Loom.UI.Terminal.Views.Windows;
 using Terminal.Gui;
-using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Controllers;
 
