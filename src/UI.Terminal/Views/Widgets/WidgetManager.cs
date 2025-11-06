@@ -5,6 +5,7 @@ namespace Loom.UI.Terminal.Views.Widgets;
 public class WidgetManager
 {
     private readonly List<IWidget> _widgets = new();
+    private int _currentIndex = 0;
 
     public void RegisterWidget(IWidget widget)
     {

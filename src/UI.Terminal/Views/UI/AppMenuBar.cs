@@ -1,65 +1,52 @@
-using Loom.Application.DTOs.Tasks;
+using Loom.Application.Interfaces;
 using Loom.Core.Entities;
-using Loom.Infrastructure.Persistence;
-using Loom.UI.Terminal.Controllers;
+using Loom.UI.Terminal.Commands;
 using Terminal.Gui;
-using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Views.UI;
 
 public static class AppMenuBar
 {
-    public static MenuBar Create(
-        TaskListController taskController,
-        AppController appController,
-        ConfigRepository configRepo
-    )
+    public static MenuBar Create(ICommandRegistry commandRegistry)
     {
+        static string FormatMenuLabel(string label, CommandDefinition? command)
+        {
+            if (command is null || string.IsNullOrWhiteSpace(command.Shortcut))
+                return label;
+
+            return $"{label} ({command.Shortcut})";
+        }
+
+        MenuItem CreateMenuItem(string label, string commandId)
+        {
+            var command =
+                commandRegistry.GetById(commandId)
+                ?? throw new InvalidOperationException($"Command '{commandId}' is not registered");
+
+            return new MenuItem(
+                FormatMenuLabel(label, command),
+                command.Description ?? string.Empty,
+                () => commandRegistry.Execute(commandId)
+            );
+        }
         return new MenuBar
         {
             Menus = new[]
             {
                 // --- FILE ---
-                new MenuBarItem(
-                    "_File",
-                    new[] { new MenuItem("_Quit (q)", "", () => TuiApp.RequestStop()) }
-                ),
+                new MenuBarItem("_File", new[] { CreateMenuItem("_Quit", CommandIds.App.Quit) }),
                 // --- TASKS ---
                 new MenuBarItem(
                     "_Tasks",
                     new[]
                     {
-                        new MenuItem("_Add (a)", "", async () => await taskController.AddTask()),
-                        new MenuItem(
-                            "_Edit (e)",
-                            "",
-                            async () => await taskController.EditSelectedTask()
-                        ),
-                        new MenuItem(
-                            "_Delete (d)",
-                            "",
-                            async () => await taskController.DeleteSelectedTask()
-                        ),
-                        new MenuItem(
-                            "_Toggle Complete (Space)",
-                            "",
-                            async () => await taskController.ToggleCompleteSelected()
-                        ),
-                        new MenuItem(
-                            "_Expand / Collapse (Enter)",
-                            "",
-                            () => taskController.ToggleExpandCollapse()
-                        ),
-                        new MenuItem(
-                            "_Filter Tasks (f)",
-                            "",
-                            async () => await taskController.FilterTasks()
-                        ),
-                        new MenuItem(
-                            "_All Tasks (A)",
-                            "",
-                            async () => await taskController.LoadTasks(new TaskFilter())
-                        ),
+                        CreateMenuItem("_Add", CommandIds.Tasks.Add),
+                        CreateMenuItem("_Edit", CommandIds.Tasks.Edit),
+                        CreateMenuItem("_Delete", CommandIds.Tasks.Delete),
+                        CreateMenuItem("_Toggle Complete", CommandIds.Tasks.ToggleComplete),
+                        CreateMenuItem("_Expand / Collapse", CommandIds.Tasks.ToggleExpand),
+                        CreateMenuItem("_Filter Tasks", CommandIds.Tasks.Filter),
+                        CreateMenuItem("_All Tasks", CommandIds.Tasks.ShowAll),
                     }
                 ),
                 // --- NAVIGATION ---
@@ -67,50 +54,19 @@ public static class AppMenuBar
                     "_Navigation",
                     new[]
                     {
-                        new MenuItem(
-                            "_Dashboard (Ctrl+D)",
-                            "",
-                            () => appController.ShowDashboard()
-                        ),
-                        new MenuItem("_Task List (Ctrl+T)", "", () => appController.ShowTasks()),
+                        CreateMenuItem("_Dashboard", CommandIds.Navigation.ShowDashboard),
+                        CreateMenuItem("_Task List", CommandIds.Navigation.ShowTasks),
                     }
                 ),
                 // --- SETTINGS ---
                 new MenuBarItem(
                     "_Settings",
-                    new[]
-                    {
-                        new MenuItem(
-                            "_Save Config",
-                            "",
-                            async () =>
-                            {
-                                var config = new AppConfig
-                                {
-                                    LastOpenView = appController.CurrentViewName,
-                                };
-
-                                await configRepo.SaveAsync(config);
-                                MessageBox.Query(
-                                    "Config Saved",
-                                    "Configuration successfully saved!",
-                                    "OK"
-                                );
-                            }
-                        ),
-                    }
+                    new[] { CreateMenuItem("_Save Config", CommandIds.Settings.SaveConfig) }
                 ),
                 // --- TOOLS ---
                 new MenuBarItem(
                     "_Tools",
-                    new[]
-                    {
-                        new MenuItem(
-                            "_Command Palette (Ctrl+P)",
-                            "",
-                            async () => await appController.ShowCommandPaletteAsync()
-                        ),
-                    }
+                    new[] { CreateMenuItem("_Command Palette", CommandIds.Tools.CommandPalette) }
                 ),
             },
         };

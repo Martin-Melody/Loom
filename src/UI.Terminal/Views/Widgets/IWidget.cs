@@ -4,9 +4,11 @@ namespace Loom.UI.Terminal.Views.Widgets;
 
 public interface IWidget
 {
-    String Title { get; }
+    bool IsFocused { get; }
 
     View Render();
 
     void Refresh();
+
+    void SetFocus();
 }

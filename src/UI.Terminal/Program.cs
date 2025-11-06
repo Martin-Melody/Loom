@@ -2,11 +2,12 @@ using Loom.Application.Interfaces;
 using Loom.Application.UseCases.Tasks;
 using Loom.Infrastructure.Persistence;
 using Loom.Infrastructure.Persistence.Json;
-using Loom.Infrastructure.Services;
+using Loom.Infrastructure.Registry;
 using Loom.Infrastructure.Time;
 using Loom.UI.Terminal.Controllers;
 using Loom.UI.Terminal.Theme;
 using Loom.UI.Terminal.Views.UI;
+using Loom.UI.Terminal.Views.Widgets;
 using Loom.UI.Terminal.Views.Windows;
 using Terminal.Gui;
 using TuiApp = Terminal.Gui.Application;
@@ -58,8 +59,14 @@ public static class Program
             filterTasks
         );
 
-        var taskListWindow = new TaskListWindow(taskController, listView);
+        var widgetManager = new WidgetManager();
+
+        var commandRegistry = new CommandRegistry();
+
+        var taskListWindow = new TaskListWindow(taskController, listView, commandRegistry);
         var dashboardWindow = new DashboardWindow();
+
+        var dashboardController = new DashboardController(widgetManager, dashboardWindow);
 
         // --- Root View ---
         var top = Toplevel.Create();
@@ -73,17 +80,15 @@ public static class Program
             BorderStyle = LineStyle.None,
         };
 
-        var commandRegistry = new CommandRegistry();
-
         var appController = new AppController(
             dashboardWindow,
             taskListWindow,
             mainContent,
             commandRegistry
         );
-        appController.RegisterCommands(taskController);
+        appController.RegisterCommands(taskController, dashboardController, configRepo);
 
-        var menuBar = AppMenuBar.Create(taskController, appController, configRepo);
+        var menuBar = AppMenuBar.Create(commandRegistry);
 
         top.Add(menuBar, mainContent);
 

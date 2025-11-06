@@ -1,80 +1,49 @@
-using Loom.Application.DTOs.Tasks;
-using Loom.UI.Terminal.Controllers;
+using Loom.Application.Interfaces;
+using Loom.UI.Terminal.Commands;
 using Terminal.Gui;
-using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Input;
 
 public class TaskListKeyHandler
 {
-    private readonly TaskListController _controller;
     private readonly ListView _list;
+    private readonly ICommandRegistry _registry;
 
-    public TaskListKeyHandler(TaskListController controller, ListView list)
+    private static readonly Dictionary<Key, string> _commandBindings = new()
     {
-        _controller = controller;
+        { Key.Space, CommandIds.Tasks.ToggleComplete },
+        { Key.Enter, CommandIds.Tasks.ToggleExpand },
+        { Key.a, CommandIds.Tasks.Add },
+        { Key.A, CommandIds.Tasks.ShowAll },
+        { Key.e, CommandIds.Tasks.Edit },
+        { Key.f, CommandIds.Tasks.Filter },
+        { Key.d, CommandIds.Tasks.Delete },
+        { Key.r, CommandIds.Tasks.Refresh },
+        { Key.T, CommandIds.Tasks.ShowToday },
+        { Key.q, CommandIds.App.Quit },
+    };
+
+    public TaskListKeyHandler(ListView list, ICommandRegistry registry)
+    {
         _list = list;
+        _registry = registry;
     }
 
     public void Attach()
     {
-        _list.KeyDown += async (_, args) =>
+        _list.KeyDown += (_, args) =>
         {
             var key = args.KeyEvent.Key;
 
+            if (_commandBindings.TryGetValue(key, out var commandId))
+            {
+                args.Handled = true;
+                _registry.Execute(commandId);
+                return;
+            }
+
             switch (key)
             {
-                // --- Existing shortcuts ---
-                case Key.Space:
-                    args.Handled = true;
-                    await _controller.ToggleCompleteSelected();
-                    break;
-
-                case Key.Enter:
-                    args.Handled = true;
-                    _controller.ToggleExpandCollapse();
-                    break;
-
-                case Key.a:
-                    args.Handled = true;
-                    await _controller.AddTask();
-                    break;
-
-                case Key.A:
-                    args.Handled = true;
-                    await _controller.LoadTasks(new TaskFilter());
-                    break;
-
-                case Key.e:
-                    args.Handled = true;
-                    await _controller.EditSelectedTask();
-                    break;
-
-                case Key.f:
-                    args.Handled = true;
-                    await _controller.FilterTasks();
-                    break;
-
-                case Key.d:
-                    args.Handled = true;
-                    await _controller.DeleteSelectedTask();
-                    break;
-
-                case Key.r:
-                    args.Handled = true;
-                    await _controller.LoadTasks(_controller.CurrentFilter);
-                    break;
-
-                case Key.T:
-                    args.Handled = true;
-                    await _controller.LoadTasks();
-                    break;
-
-                case Key.q:
-                    args.Handled = true;
-                    TuiApp.Shutdown();
-                    break;
-
                 // --- Vim-style navigation ---
                 case Key.j:
                     args.Handled = true;
@@ -101,12 +70,11 @@ public class TaskListKeyHandler
 
     private void MoveSelection(int delta)
     {
-        if (_list.Source.Count == 0) return;
+        if (_list.Source.Count == 0)
+            return;
 
         int newIndex = Math.Clamp(_list.SelectedItem + delta, 0, _list.Source.Count - 1);
         _list.SelectedItem = newIndex;
         _list.SetNeedsDisplay();
     }
-
 }
-
