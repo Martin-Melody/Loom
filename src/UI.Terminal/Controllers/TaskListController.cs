@@ -103,7 +103,7 @@ public class TaskListController
     // TODO: Wrap these async method in Try-Catch Block to catch errors.
     public async Task AddTask()
     {
-        var dlg = new AddTaskDialog(_createTask);
+        var dlg = new AddTaskDialog(_addTask);
         TuiApp.Run(dlg);
 
         if (dlg.TaskCreated)
