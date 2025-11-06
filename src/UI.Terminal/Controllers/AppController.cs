@@ -1,8 +1,10 @@
-using Loom.Infrastructure.Services;
+using Loom.Application.Interfaces;
+using Loom.Infrastructure.Persistence;
+using Loom.UI.Terminal.Commands;
+using Loom.UI.Terminal.Input;
 using Loom.UI.Terminal.Views.Dialogs;
 using Loom.UI.Terminal.Views.Windows;
 using Terminal.Gui;
-using LoomCommand = Loom.Core.Entities.Command;
 using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Controllers;
@@ -11,78 +13,59 @@ public class AppController
 {
     private readonly DashboardWindow _dashboard;
     private readonly TaskListWindow _taskList;
-    private readonly View _mainContent;
-    private readonly CommandRegistry _commandRegistry;
-    public string CurrentViewName { get; private set; } = "Dashboard";
+    private readonly ICommandRegistry _commands;
+    private readonly ViewNavigator _navigator;
+    private readonly CommandPaletteController _palette;
+    private readonly GlobalShortcutManager _shortcuts;
+
+    public string CurrentViewName => _navigator.CurrentViewName;
 
     public AppController(
         DashboardWindow dashboard,
         TaskListWindow taskList,
         View mainContent,
-        CommandRegistry commandRegistry
+        ICommandRegistry commands
     )
     {
         _dashboard = dashboard;
         _taskList = taskList;
-        _mainContent = mainContent;
-        _commandRegistry = commandRegistry;
-
-        AddNavigationKeys();
+        _commands = commands;
+        _navigator = new ViewNavigator(mainContent);
+        _palette = new CommandPaletteController(commands);
+        _shortcuts = new GlobalShortcutManager(commands);
     }
 
-    private void AddNavigationKeys()
-    {
-        TuiApp.RootKeyEvent = (keyEvent) =>
-        {
-            if (keyEvent.Key == (Key.CtrlMask | Key.D))
-            {
-                ShowDashboard();
-                return true;
-            }
-            else if (keyEvent.Key == (Key.CtrlMask | Key.T))
-            {
-                ShowTasks();
-                return true;
-            }
+    public void ShowDashboard() => _navigator.Show(_dashboard, "Dashboard");
 
-            return false;
-        };
-    }
+    public void ShowTasks() => _navigator.Show(_taskList, "TaskList");
 
-    public void ShowDashboard()
-    {
-        _mainContent.RemoveAll();
-        _mainContent.Add(_dashboard);
-        _dashboard.FocusFirst();
-        CurrentViewName = "Dashboard";
-        TuiApp.Refresh();
-    }
+    public void ShowCommandPalette() => _palette.Show();
 
-    public void ShowTasks()
+    public void RegisterCommands(
+        TaskListController taskController,
+        DashboardController dashboardController,
+        ConfigRepository configRepo
+    )
     {
-        _mainContent.RemoveAll();
-        _mainContent.Add(_taskList);
-        _taskList.FocusFirst();
-        CurrentViewName = "TaskList";
-        TuiApp.Refresh();
-    }
+        foreach (var cmd in GlobalCommandDefinitions.Create(this, configRepo))
+            _commands.Register(cmd);
 
-    public async Task ShowCommandPaletteAsync()
-    {
-        var dlg = new CommandPaletteDialog(_commandRegistry);
-        TuiApp.Run(dlg);
-    }
+        foreach (
+            var cmd in TaskListCommandDefinitions.Create(
+                taskController,
+                () => CurrentViewName == "TaskList"
+            )
+        )
+            _commands.Register(cmd);
 
-    public void RegisterCommands(TaskListController taskController)
-    {
-        _commandRegistry.Register(
-            new LoomCommand("Open Dashboard", "Navigation", async () => ShowDashboard())
-        );
-        _commandRegistry.Register(
-            new LoomCommand("Open Task List", "Navigation", async () => ShowTasks())
-        );
-        _commandRegistry.Register(
-            new LoomCommand("Add Task", "Tasks", async () => await taskController.AddTask())
-        );
+        foreach (
+            var cmd in DashboardCommandDefinitions.Create(
+                dashboardController,
+                () => CurrentViewName == "Dashboard"
+            )
+        )
+            _commands.Register(cmd);
+
+        _shortcuts.Configure();
     }
 }
