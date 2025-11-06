@@ -56,6 +56,10 @@ public static class AppMenuBar
                     {
                         CreateMenuItem("_Dashboard", CommandIds.Navigation.ShowDashboard),
                         CreateMenuItem("_Task List", CommandIds.Navigation.ShowTasks),
+                        CreateMenuItem("_Day View", CommandIds.Navigation.ShowDay),
+                        CreateMenuItem("_Week View", CommandIds.Navigation.ShowWeek),
+                        CreateMenuItem("_Month View", CommandIds.Navigation.ShowMonth),
+                        CreateMenuItem("_Year View", CommandIds.Navigation.ShowYear),
                     }
                 ),
                 // --- SETTINGS ---

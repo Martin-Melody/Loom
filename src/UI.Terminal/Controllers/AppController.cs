@@ -11,6 +11,11 @@ public class AppController
 {
     private readonly DashboardWindow _dashboard;
     private readonly TaskListWindow _taskList;
+    private readonly DayViewWindow _dayView;
+    private readonly WeekViewWindow _weekView;
+    private readonly MonthViewWindow _monthView;
+    private readonly YearViewWindow _yearView;
+
     private readonly ICommandRegistry _commands;
     private readonly ViewNavigator _navigator;
     private readonly CommandPaletteController _palette;
@@ -21,12 +26,20 @@ public class AppController
     public AppController(
         DashboardWindow dashboard,
         TaskListWindow taskList,
+        DayViewWindow dayView,
+        WeekViewWindow weekView,
+        MonthViewWindow monthView,
+        YearViewWindow yearView,
         View mainContent,
         ICommandRegistry commands
     )
     {
         _dashboard = dashboard;
         _taskList = taskList;
+        _dayView = dayView;
+        _weekView = weekView;
+        _monthView = monthView;
+        _yearView = yearView;
         _commands = commands;
         _navigator = new ViewNavigator(mainContent);
         _palette = new CommandPaletteController(commands);
@@ -36,6 +49,14 @@ public class AppController
     public void ShowDashboard() => _navigator.Show(_dashboard, "Dashboard");
 
     public void ShowTasks() => _navigator.Show(_taskList, "TaskList");
+
+    public void ShowDay() => _navigator.Show(_dayView, "DayView");
+
+    public void ShowWeek() => _navigator.Show(_weekView, "WeekView");
+
+    public void ShowMonth() => _navigator.Show(_monthView, "MonthView");
+
+    public void ShowYear() => _navigator.Show(_yearView, "YearView");
 
     public void ShowCommandPalette() => _palette.Show();
 
