@@ -75,14 +75,18 @@ public static class Program
         // --- Root View ---
         var top = Toplevel.Create();
 
+        var sidebarView = new SidebarView(commandRegistry);
+
         var mainContent = new FrameView
         {
-            X = 0,
+            X = Pos.Right(sidebarView),
             Y = 1,
             Width = Dim.Fill(),
             Height = Dim.Fill(),
             BorderStyle = LineStyle.None,
         };
+
+        var sidebarController = new SidebarController(sidebarView, mainContent);
 
         var appController = new AppController(
             dashboardWindow,
@@ -92,13 +96,16 @@ public static class Program
             MonthViewWindow,
             YearViewWindow,
             mainContent,
-            commandRegistry
+            commandRegistry,
+            sidebarController
         );
         appController.RegisterCommands(taskController, dashboardController, configRepo);
 
+        sidebarView.LoadCommands();
+
         var menuBar = AppMenuBar.Create(commandRegistry);
 
-        top.Add(menuBar, mainContent);
+        top.Add(menuBar, sidebarView, mainContent);
 
         // --- Start with last open view ---
         if (config.LastOpenView == nameof(TaskListWindow).Replace("Window", ""))

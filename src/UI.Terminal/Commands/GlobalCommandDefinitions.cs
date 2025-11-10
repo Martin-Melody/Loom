@@ -65,6 +65,30 @@ public static class GlobalCommandDefinitions
                 isGlobalShortcut: true
             ),
             new CommandDefinition(
+                CommandIds.Navigation.ToggleSidebar,
+                "Toggle Sidebar",
+                "Navigation",
+                () => app.ToggleSidebar(),
+                shortcut: "ctrl+e",
+                isGlobalShortcut: true
+            ),
+            new CommandDefinition(
+                CommandIds.Navigation.FocusSidebar,
+                "Focus Sidebar",
+                "Navigation",
+                () => app.FocusSidebar(),
+                shortcut: "ctrl+h",
+                isGlobalShortcut: true
+            ),
+            new CommandDefinition(
+                CommandIds.Navigation.FocusMainContent,
+                "Focus Main Content",
+                "Navigation",
+                () => app.FocusMainContent(),
+                shortcut: "ctrl+l",
+                isGlobalShortcut: true
+            ),
+            new CommandDefinition(
                 CommandIds.Settings.SaveConfig,
                 "Save Configuration",
                 "Settings",

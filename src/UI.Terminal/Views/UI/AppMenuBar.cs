@@ -54,6 +54,7 @@ public static class AppMenuBar
                     "_Navigation",
                     new[]
                     {
+                        CreateMenuItem("_Toggle Sidebar", CommandIds.Navigation.ToggleSidebar),
                         CreateMenuItem("_Dashboard", CommandIds.Navigation.ShowDashboard),
                         CreateMenuItem("_Task List", CommandIds.Navigation.ShowTasks),
                         CreateMenuItem("_Day View", CommandIds.Navigation.ShowDay),
