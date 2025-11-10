@@ -10,6 +10,7 @@ public class TaskSummaryExampleWidget : BaseWidget
         : base("Tasks Overview")
     {
         _status = new Label("Press 'r' to refresh") { X = 1, Y = 1 };
+        CanFocus = true;
         Add(_status);
 
         BindKey(Key.r, () => Refresh());

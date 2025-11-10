@@ -15,6 +15,7 @@ public class AppController
     private readonly WeekViewWindow _weekView;
     private readonly MonthViewWindow _monthView;
     private readonly YearViewWindow _yearView;
+    private readonly SidebarController _sidebarController;
 
     private readonly ICommandRegistry _commands;
     private readonly ViewNavigator _navigator;
@@ -31,7 +32,8 @@ public class AppController
         MonthViewWindow monthView,
         YearViewWindow yearView,
         View mainContent,
-        ICommandRegistry commands
+        ICommandRegistry commands,
+        SidebarController sidebarController
     )
     {
         _dashboard = dashboard;
@@ -41,6 +43,7 @@ public class AppController
         _monthView = monthView;
         _yearView = yearView;
         _commands = commands;
+        _sidebarController = sidebarController;
         _navigator = new ViewNavigator(mainContent);
         _palette = new CommandPaletteController(commands);
         _shortcuts = new GlobalShortcutManager(commands);
@@ -59,6 +62,12 @@ public class AppController
     public void ShowYear() => _navigator.Show(_yearView, "YearView");
 
     public void ShowCommandPalette() => _palette.Show();
+
+    public void ToggleSidebar() => _sidebarController.Toggle();
+
+    public void FocusSidebar() => _sidebarController?.FocusSidebar();
+
+    public void FocusMainContent() => _navigator.FocusCurrentView();
 
     public void RegisterCommands(
         TaskListController taskController,
