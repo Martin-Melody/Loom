@@ -65,6 +65,18 @@ public class GlobalShortcutManager
                 case "alt":
                     result |= Key.AltMask;
                     break;
+                case "up":
+                    result |= Key.CursorUp;
+                    break;
+                case "down":
+                    result |= Key.CursorDown;
+                    break;
+                case "left":
+                    result |= Key.CursorLeft;
+                    break;
+                case "right":
+                    result |= Key.CursorRight;
+                    break;
                 default:
                     if (Enum.TryParse<Key>(part, true, out var parsed))
                         result |= parsed;
