@@ -11,7 +11,7 @@ public class SidebarView : FrameView
     private List<CommandDefinition> _navCommands = new();
 
     public SidebarView(ICommandRegistry commands)
-        : base("Navigation")
+        : base()
     {
         _commands = commands;
 
@@ -19,14 +19,19 @@ public class SidebarView : FrameView
         Y = 1;
         Width = 25;
         Height = Dim.Fill();
-        BorderStyle = LineStyle.Rounded;
+        BorderStyle = LineStyle.Single;
         CanFocus = true;
+
+        Border.Thickness = new Thickness(left: 0, top: 0, right: 1, bottom: 0);
 
         _listView = new ListView(new List<string>())
         {
+            X = 1,
+            Y = 1,
             Width = Dim.Fill(),
-            Height = Dim.Fill(),
+            // Height = Dim.Fill(),
             CanFocus = true,
+            BorderStyle = LineStyle.Single,
         };
 
         _listView.OpenSelectedItem += (_, args) =>
@@ -49,7 +54,22 @@ public class SidebarView : FrameView
             .OrderBy(c => c.Name)
             .ToList();
 
-        _listView.SetSource(_navCommands.Select(n => n.Name).ToList());
+        var items = _navCommands.Select(FormatLabel).ToList();
+        _listView.SetSource(items);
+
+        _listView.Height = Dim.Function(() =>
+        {
+            var itemCount = _navCommands?.Count ?? 0;
+            return Math.Min(itemCount + 2, Bounds.Height);
+        });
+
+        _listView.Title = "Navigation";
+
+        _listView.BorderStyle = LineStyle.Single;
+
+        var bordr = new Thickness(top: 1, bottom: 1, right: 0, left: 0);
+
+        _listView.Border.Thickness = bordr;
         SetNeedsDisplay();
     }
 
