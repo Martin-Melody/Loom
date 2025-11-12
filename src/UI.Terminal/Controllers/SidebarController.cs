@@ -1,3 +1,5 @@
+using Loom.Application.Services;
+using Loom.Core.Entities.Enums;
 using Loom.UI.Terminal.Views.UI;
 using Terminal.Gui;
 using TuiApp = Terminal.Gui.Application;
@@ -8,49 +10,72 @@ public class SidebarController
 {
     private readonly SidebarView _sidebar;
     private readonly View _mainContent;
-    private bool _isVisible = true;
+    private readonly AppStateService _state;
 
-    public SidebarController(SidebarView sidebar, View mainContent)
+    private bool _isVisible;
+    private bool _isAnimating;
+
+    private const int TargetWidth = 25;
+    private const int Step = 5;
+    private const int FrameMs = 10;
+
+    public SidebarController(SidebarView sidebar, View mainContent, AppStateService state)
     {
         _sidebar = sidebar;
         _mainContent = mainContent;
+        _state = state;
+
+        _isVisible = _state.SidebarState == SidebarState.Opened;
+        ApplyStateInstant();
     }
 
     public bool IsVisible => _isVisible;
 
     public void Toggle()
     {
+        if (_isAnimating)
+            return;
+
         _isVisible = !_isVisible;
 
         if (_isVisible)
-        {
-            _sidebar.Visible = true;
-            _mainContent.X = Pos.Right(_sidebar);
-
-            _sidebar.SetFocus();
-
-            for (int w = 0; w <= 25; w += 5)
-            {
-                _sidebar.Width = w;
-                _sidebar.SuperView?.LayoutSubviews();
-                TuiApp.Refresh();
-                Thread.Sleep(10);
-            }
-        }
+            SmoothShow();
         else
-        {
-            for (int w = 25; w >= 0; w -= 5)
-            {
-                _sidebar.Width = w;
-                _sidebar.SuperView?.LayoutSubviews();
-                TuiApp.Refresh();
-                Thread.Sleep(10);
-            }
+            SmoothHide();
 
-            _sidebar.Visible = false;
-            _mainContent.X = 0;
+        _state.SidebarState = _isVisible ? SidebarState.Opened : SidebarState.Closed;
+    }
+
+    public void Show()
+    {
+        if (!_isVisible)
+            Toggle();
+    }
+
+    public void Hide()
+    {
+        if (_isVisible)
+            Toggle();
+    }
+
+    public void FocusSidebar()
+    {
+        if (_isVisible)
+            _sidebar.FocusList();
+    }
+
+    // --- helpers ---
+
+    private void ApplyStateInstant()
+    {
+        _sidebar.Visible = _isVisible;
+        _sidebar.Width = _isVisible ? TargetWidth : 0;
+        _mainContent.X = _isVisible ? Pos.Right(_sidebar) : 0;
+
+        if (_isVisible)
+            _sidebar.SetFocus();
+        else
             _mainContent.SetFocus();
-        }
 
         _sidebar.SuperView?.LayoutSubviews();
         _sidebar.SetNeedsDisplay();
@@ -58,32 +83,50 @@ public class SidebarController
         TuiApp.Refresh();
     }
 
-    public void Show() => SetVisibility(true);
-
-    public void Hide() => SetVisibility(false);
-
-    public void FocusMainContent() => _mainContent.SetFocus();
-
-    public void FocusSidebar()
+    private void SmoothShow()
     {
-        if (IsVisible)
-            _sidebar.FocusList();
+        _isAnimating = true;
+
+        _sidebar.Visible = true;
+        _sidebar.Width = 0;
+        _mainContent.X = Pos.Right(_sidebar);
+        _sidebar.SetFocus();
+
+        for (int w = 0; w <= TargetWidth; w += Step)
+        {
+            _sidebar.Width = w;
+            _sidebar.SuperView?.LayoutSubviews();
+            TuiApp.Refresh();
+            Thread.Sleep(FrameMs);
+        }
+
+        _sidebar.Width = TargetWidth;
+        FinishFrame();
+        _isAnimating = false;
     }
 
-    private void SetVisibility(bool visible)
+    private void SmoothHide()
     {
-        if (_isVisible == visible)
-            return;
+        _isAnimating = true;
 
-        _isVisible = visible;
-        _sidebar.Visible = visible;
-        _mainContent.X = visible ? Pos.Right(_sidebar) : 0;
+        for (int w = TargetWidth; w >= 0; w -= Step)
+        {
+            _sidebar.Width = w;
+            _sidebar.SuperView?.LayoutSubviews();
+            TuiApp.Refresh();
+            Thread.Sleep(FrameMs);
+        }
 
-        if (visible)
-            _sidebar.SetFocus();
-        else
-            _mainContent.SetFocus();
+        _sidebar.Visible = false;
+        _mainContent.X = 0;
+        _mainContent.SetFocus();
 
+        FinishFrame();
+        _isAnimating = false;
+    }
+
+    private void FinishFrame()
+    {
         _sidebar.SuperView?.LayoutSubviews();
         _sidebar.SetNeedsDisplay();
         _mainContent.SetNeedsDisplay();

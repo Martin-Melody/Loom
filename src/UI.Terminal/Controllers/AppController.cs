@@ -1,5 +1,6 @@
 using Loom.Application.Interfaces;
-using Loom.Infrastructure.Persistence;
+using Loom.Application.Services;
+using Loom.Core.Entities.Enums;
 using Loom.UI.Terminal.Commands;
 using Loom.UI.Terminal.Input;
 using Loom.UI.Terminal.Views.Windows;
@@ -18,11 +19,13 @@ public class AppController
     private readonly SidebarController _sidebarController;
 
     private readonly ICommandRegistry _commands;
+
     private readonly ViewNavigator _navigator;
     private readonly CommandPaletteController _palette;
     private readonly GlobalShortcutManager _shortcuts;
+    private readonly AppStateService _state;
 
-    public string CurrentViewName => _navigator.CurrentViewName;
+    public ViewType CurrentView => _state.LastOpenView;
 
     public AppController(
         DashboardWindow dashboard,
@@ -33,7 +36,8 @@ public class AppController
         YearViewWindow yearView,
         View mainContent,
         ICommandRegistry commands,
-        SidebarController sidebarController
+        SidebarController sidebarController,
+        AppStateService state
     )
     {
         _dashboard = dashboard;
@@ -44,44 +48,79 @@ public class AppController
         _yearView = yearView;
         _commands = commands;
         _sidebarController = sidebarController;
+        _state = state;
+
         _navigator = new ViewNavigator(mainContent);
         _palette = new CommandPaletteController(commands);
         _shortcuts = new GlobalShortcutManager(commands);
     }
 
-    public void ShowDashboard() => _navigator.Show(_dashboard, "Dashboard");
+    private void Show(ViewType type, View window, string name)
+    {
+        _navigator.Show(window, name);
+        _state.LastOpenView = type;
+        _ = _state.SaveAsync(); // fire and forget
+    }
 
-    public void ShowTasks() => _navigator.Show(_taskList, "TaskList");
+    public void ShowDashboard() => Show(ViewType.Dashboard, _dashboard, "Dashboard");
 
-    public void ShowDay() => _navigator.Show(_dayView, "DayView");
+    public void ShowTasks() => Show(ViewType.TaskList, _taskList, "TaskList");
 
-    public void ShowWeek() => _navigator.Show(_weekView, "WeekView");
+    public void ShowDay() => Show(ViewType.DayView, _dayView, "DayView");
 
-    public void ShowMonth() => _navigator.Show(_monthView, "MonthView");
+    public void ShowWeek() => Show(ViewType.WeekView, _weekView, "WeekView");
 
-    public void ShowYear() => _navigator.Show(_yearView, "YearView");
+    public void ShowMonth() => Show(ViewType.MonthView, _monthView, "MonthView");
+
+    public void ShowYear() => Show(ViewType.YearView, _yearView, "YearView");
+
+    public void ShowView(ViewType viewType)
+    {
+        switch (viewType)
+        {
+            case ViewType.TaskList:
+                ShowTasks();
+                break;
+            case ViewType.DayView:
+                ShowDay();
+                break;
+            case ViewType.WeekView:
+                ShowWeek();
+                break;
+            case ViewType.MonthView:
+                ShowMonth();
+                break;
+            case ViewType.YearView:
+                ShowYear();
+                break;
+            default:
+                ShowDashboard();
+                break;
+        }
+    }
 
     public void ShowCommandPalette() => _palette.Show();
 
     public void ToggleSidebar() => _sidebarController.Toggle();
 
-    public void FocusSidebar() => _sidebarController?.FocusSidebar();
+    public void FocusSidebar() => _sidebarController.FocusSidebar();
 
     public void FocusMainContent() => _navigator.FocusCurrentView();
 
+    public async Task SaveAppStateAsync() => await _state.SaveAsync();
+
     public void RegisterCommands(
         TaskListController taskController,
-        DashboardController dashboardController,
-        ConfigRepository configRepo
+        DashboardController dashboardController
     )
     {
-        foreach (var cmd in GlobalCommandDefinitions.Create(this, configRepo))
+        foreach (var cmd in GlobalCommandDefinitions.Create(this))
             _commands.Register(cmd);
 
         foreach (
             var cmd in TaskListCommandDefinitions.Create(
                 taskController,
-                () => CurrentViewName == "TaskList"
+                () => CurrentView == ViewType.TaskList
             )
         )
             _commands.Register(cmd);
@@ -89,7 +128,7 @@ public class AppController
         foreach (
             var cmd in DashboardCommandDefinitions.Create(
                 dashboardController,
-                () => CurrentViewName == "Dashboard"
+                () => CurrentView == ViewType.Dashboard
             )
         )
             _commands.Register(cmd);
