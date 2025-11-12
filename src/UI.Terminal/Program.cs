@@ -1,5 +1,7 @@
 using Loom.Application.Interfaces;
+using Loom.Application.Services;
 using Loom.Application.UseCases.Tasks;
+using Loom.Core.Entities.Enums;
 using Loom.Infrastructure.Persistence;
 using Loom.Infrastructure.Persistence.Json;
 using Loom.Infrastructure.Registry;
@@ -25,6 +27,9 @@ public static class Program
         );
 
         var configRepo = new ConfigRepository();
+        var appState = new AppStateService(configRepo);
+        await appState.InitalizeAsync();
+
         var config = await configRepo.LoadAsync();
 
         var tasksRepo = new JsonTaskRepository(dataDir);
@@ -86,7 +91,7 @@ public static class Program
             BorderStyle = LineStyle.None,
         };
 
-        var sidebarController = new SidebarController(sidebarView, mainContent);
+        var sidebarController = new SidebarController(sidebarView, mainContent, appState);
 
         var appController = new AppController(
             dashboardWindow,
@@ -97,9 +102,10 @@ public static class Program
             YearViewWindow,
             mainContent,
             commandRegistry,
-            sidebarController
+            sidebarController,
+            appState
         );
-        appController.RegisterCommands(taskController, dashboardController, configRepo);
+        appController.RegisterCommands(taskController, dashboardController);
 
         sidebarView.LoadCommands();
 
@@ -107,18 +113,16 @@ public static class Program
 
         top.Add(menuBar, sidebarView, mainContent);
 
-        // --- Start with last open view ---
-        if (config.LastOpenView == nameof(TaskListWindow).Replace("Window", ""))
-            appController.ShowTasks();
-        else
-            appController.ShowDashboard();
+        appController.ShowView(appState.LastOpenView);
 
         // --- Run ---
         TuiApp.Run(top);
         TuiApp.Shutdown();
 
-        // --- Save config on exit ---
-        config.LastOpenView = appController.CurrentViewName;
-        await configRepo.SaveAsync(config);
+        appState.LastOpenView = appController.CurrentView;
+        appState.SidebarState = sidebarController.IsVisible
+            ? SidebarState.Opened
+            : SidebarState.Closed;
+        await appState.SaveAsync();
     }
 }
