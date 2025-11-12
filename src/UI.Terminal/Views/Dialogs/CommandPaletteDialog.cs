@@ -5,7 +5,7 @@ using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Views.Dialogs;
 
-public sealed class CommandPaletteDialog : Dialog
+public sealed class CommandPaletteDialog : BaseDialog
 {
     private readonly TextField _searchBox = null!;
     private readonly ListView _listView = null!;
@@ -14,13 +14,10 @@ public sealed class CommandPaletteDialog : Dialog
     private CommandDefinition? _selectedCommand;
 
     public CommandPaletteDialog(ICommandRegistry registry)
+        : base("Command Palette", defaultHeight: 18, maxWidth: 70)
     {
         _registry = registry;
         _filtered = LoadCommands(string.Empty);
-
-        Title = "Command Palette";
-        Width = 60;
-        Height = 20;
 
         // --- Search box ---
         _searchBox = new TextField("")
