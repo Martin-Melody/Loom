@@ -5,7 +5,7 @@ using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Views.Dialogs;
 
-public class EditTaskDialog : Dialog
+public class EditTaskDialog : BaseDialog
 {
     private readonly EditTask _editTask;
     private readonly TaskItem _task;
@@ -20,13 +20,8 @@ public class EditTaskDialog : Dialog
     public bool TaskUpdated { get; private set; } = false;
 
     public EditTaskDialog(EditTask editTask, TaskItem task)
-        : base()
+        : base("Edit Task", defaultHeight: 18, maxWidth: 70)
     {
-        Title = "Edit Task";
-
-        Height = 18;
-        Width = 60;
-
         _editTask = editTask;
         _task = task;
 
@@ -60,12 +55,12 @@ public class EditTaskDialog : Dialog
 
         _notesView.Text = task.Notes ?? "";
 
-        var lblDue = new Label("Due (yyyy-mm-dd):") { X = 1, Y = 9 };
+        var lblDue = new Label("Due:") { X = 1, Y = 9 };
         _dueField = new TextField(task.DueDate?.ToString("yyyy-MM-dd") ?? "")
         {
-            X = 22,
+            X = 12,
             Y = 9,
-            Width = 15,
+            Width = Dim.Fill() - 2,
         };
 
         _saveButton = new Button("Save")

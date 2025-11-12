@@ -5,7 +5,7 @@ using TuiApp = Terminal.Gui.Application;
 
 namespace Loom.UI.Terminal.Views.Dialogs;
 
-public class AddTaskDialog : Dialog
+public class AddTaskDialog : BaseDialog
 {
     private readonly AddTask _addTask;
 
@@ -16,16 +16,12 @@ public class AddTaskDialog : Dialog
     private readonly Button _saveButton;
     private readonly Button _cancelButton;
 
-    public bool TaskCreated { get; private set; } = false;
+    public bool TaskCreated { get; private set; }
     public TaskItem? CreatedTask { get; private set; }
 
     public AddTaskDialog(AddTask addTask)
-        : base()
+        : base("Add New Task", defaultHeight: 18, maxWidth: 70)
     {
-        Title = "Add New Task";
-        Height = 18;
-        Width = 60;
-        Border.BorderStyle = LineStyle.Heavy;
         _addTask = addTask;
 
         // === Title ===
@@ -48,7 +44,6 @@ public class AddTaskDialog : Dialog
             AllowsTab = false,
         };
 
-        //TODO: make a note of those keybind somwhere for the user
         _notesView.KeyDown += (_, args) =>
         {
             if (args.KeyEvent.Key == (Key.CtrlMask | Key.T))
@@ -59,12 +54,12 @@ public class AddTaskDialog : Dialog
         };
 
         // === Due Date ===
-        var lblDue = new Label("Due (yyyy-mm-dd):") { X = 1, Y = 9 };
+        var lblDue = new Label("Due:") { X = 1, Y = 9 };
         _dueField = new TextField(DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd"))
         {
-            X = 22,
+            X = 12,
             Y = 9,
-            Width = 15,
+            Width = Dim.Fill() - 2,
         };
 
         // === Buttons ===
@@ -81,7 +76,7 @@ public class AddTaskDialog : Dialog
             Y = Pos.Bottom(_dueField) + 2,
         };
 
-        // === Save Logic ===
+        // === Logic ===
         _saveButton.Clicked += async (_, __) =>
         {
             var title = _titleField.Text.ToString()?.Trim() ?? "";
@@ -104,7 +99,6 @@ public class AddTaskDialog : Dialog
             TuiApp.RequestStop(this);
         };
 
-        // === Cancel Logic ===
         _cancelButton.Clicked += (_, __) => TuiApp.RequestStop(this);
 
         // === Add Views ===
@@ -119,7 +113,6 @@ public class AddTaskDialog : Dialog
             _cancelButton
         );
 
-        // === Focus ===
         _titleField.SetFocus();
     }
 }
