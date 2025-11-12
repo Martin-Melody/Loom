@@ -1,5 +1,4 @@
 using Loom.Core.Entities;
-using Loom.Infrastructure.Persistence;
 using Loom.UI.Terminal.Controllers;
 using Terminal.Gui;
 using TuiApp = Terminal.Gui.Application;
@@ -8,13 +7,11 @@ namespace Loom.UI.Terminal.Commands;
 
 public static class GlobalCommandDefinitions
 {
-    public static IEnumerable<CommandDefinition> Create(
-        AppController app,
-        ConfigRepository configRepo
-    )
+    public static IEnumerable<CommandDefinition> Create(AppController app)
     {
         return new[]
         {
+            // --- Navigation ---
             new CommandDefinition(
                 CommandIds.Navigation.ShowDashboard,
                 "Open Dashboard",
@@ -31,7 +28,6 @@ public static class GlobalCommandDefinitions
                 shortcut: "Ctrl+T",
                 isGlobalShortcut: true
             ),
-            //TODO: Change these shortcuts as Terminal GUI can't see them
             new CommandDefinition(
                 CommandIds.Navigation.ShowDay,
                 "Open Day View",
@@ -68,37 +64,38 @@ public static class GlobalCommandDefinitions
                 CommandIds.Navigation.ToggleSidebar,
                 "Toggle Sidebar",
                 "Navigation",
-                () => app.ToggleSidebar(),
-                shortcut: "ctrl+e",
+                app.ToggleSidebar,
+                shortcut: "Ctrl+E",
                 isGlobalShortcut: true
             ),
             new CommandDefinition(
                 CommandIds.Navigation.FocusSidebar,
                 "Focus Sidebar",
                 "Navigation",
-                () => app.FocusSidebar(),
-                shortcut: "ctrl+h",
+                app.FocusSidebar,
+                shortcut: "Ctrl+H",
                 isGlobalShortcut: true
             ),
             new CommandDefinition(
                 CommandIds.Navigation.FocusMainContent,
                 "Focus Main Content",
                 "Navigation",
-                () => app.FocusMainContent(),
-                shortcut: "ctrl+l",
+                app.FocusMainContent,
+                shortcut: "Ctrl+L",
                 isGlobalShortcut: true
             ),
+            // --- Settings ---
             new CommandDefinition(
                 CommandIds.Settings.SaveConfig,
                 "Save Configuration",
                 "Settings",
                 async () =>
                 {
-                    var config = new AppConfig { LastOpenView = app.CurrentViewName };
-                    await configRepo.SaveAsync(config);
-                    MessageBox.Query("Config Saved", "Configuration successfully saved!", "OK");
+                    await app.SaveAppStateAsync();
+                    MessageBox.Query("Config Saved", $"Configuration saved successfully!)", "OK");
                 }
             ),
+            // --- Application ---
             new CommandDefinition(
                 CommandIds.App.Quit,
                 "Quit",
@@ -107,6 +104,7 @@ public static class GlobalCommandDefinitions
                 shortcut: "Ctrl+Q",
                 isGlobalShortcut: true
             ),
+            // --- Tools ---
             new CommandDefinition(
                 CommandIds.Tools.CommandPalette,
                 "Command Palette",
