@@ -24,6 +24,12 @@ public sealed class TaskService : ITaskService
     {
         var items = await _repo.ListAsync(ct);
 
+        if (filter is null)
+        {
+            var today = _clock.Today;
+            items = items.Where(t => t.DueDate == today).ToList();
+        }
+
         if (filter is not null)
         {
             items = items
