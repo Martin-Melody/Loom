@@ -1,4 +1,4 @@
-using Loom.Application.UseCases.Tasks;
+using Loom.Application.DTOs.Tasks;
 using Loom.Core.Entities;
 using Terminal.Gui;
 using TuiApp = Terminal.Gui.Application;
@@ -7,8 +7,7 @@ namespace Loom.UI.Terminal.Views.Dialogs;
 
 public class EditTaskDialog : BaseDialog
 {
-    private readonly EditTask _editTask;
-    private readonly TaskItem _task;
+    private readonly TaskItem _originalTask;
 
     private readonly TextField _titleField;
     private readonly TextView _notesView;
@@ -17,14 +16,15 @@ public class EditTaskDialog : BaseDialog
     private readonly Button _saveButton;
     private readonly Button _cancelButton;
 
-    public bool TaskUpdated { get; private set; } = false;
+    public bool TaskUpdated { get; private set; }
+    public EditTaskRequest? Result { get; private set; }
 
-    public EditTaskDialog(EditTask editTask, TaskItem task)
+    public EditTaskDialog(TaskItem task)
         : base("Edit Task", defaultHeight: 18, maxWidth: 70)
     {
-        _editTask = editTask;
-        _task = task;
+        _originalTask = task;
 
+        // === Title ===
         var lblTitle = new Label("Title:") { X = 1, Y = 1 };
         _titleField = new TextField(task.Title)
         {
@@ -33,6 +33,7 @@ public class EditTaskDialog : BaseDialog
             Width = Dim.Fill() - 2,
         };
 
+        // === Notes ===
         var lblNotes = new Label("Notes:") { X = 1, Y = 3 };
         _notesView = new TextView
         {
@@ -53,8 +54,7 @@ public class EditTaskDialog : BaseDialog
             }
         };
 
-        _notesView.Text = task.Notes ?? "";
-
+        // === Due Date ===
         var lblDue = new Label("Due:") { X = 1, Y = 9 };
         _dueField = new TextField(task.DueDate?.ToString("yyyy-MM-dd") ?? "")
         {
@@ -63,6 +63,7 @@ public class EditTaskDialog : BaseDialog
             Width = Dim.Fill() - 2,
         };
 
+        // === Buttons ===
         _saveButton = new Button("Save")
         {
             IsDefault = true,
@@ -76,21 +77,36 @@ public class EditTaskDialog : BaseDialog
             Y = Pos.Bottom(_dueField) + 2,
         };
 
-        _saveButton.Clicked += async (_, __) =>
+        // === Logic ===
+        _saveButton.Clicked += (_, __) =>
         {
-            var title = _titleField.Text.ToString() ?? "";
-            var notes = _notesView.Text.ToString();
+            var title = _titleField.Text.ToString()?.Trim() ?? "";
+            var notes = _notesView.Text.ToString()?.Trim();
             DateOnly? due = null;
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                MessageBox.ErrorQuery("Invalid Input", "Title is required.", "OK");
+                return;
+            }
             if (DateOnly.TryParse(_dueField.Text.ToString(), out var parsed))
                 due = parsed;
 
-            await _editTask.Handle(_task.Id, title, notes, due);
+            Result = new EditTaskRequest
+            {
+                Id = task.Id,
+                Title = title,
+                Notes = notes,
+                Due = due,
+            };
             TaskUpdated = true;
             TuiApp.RequestStop(this);
         };
+        ;
 
         _cancelButton.Clicked += (_, __) => TuiApp.RequestStop(this);
 
+        // === Add Views ===
         Add(
             lblTitle,
             _titleField,

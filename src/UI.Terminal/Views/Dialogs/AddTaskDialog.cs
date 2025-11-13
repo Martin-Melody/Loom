@@ -1,5 +1,4 @@
-using Loom.Application.UseCases.Tasks;
-using Loom.Core.Entities;
+using Loom.Application.DTOs.Tasks;
 using Terminal.Gui;
 using TuiApp = Terminal.Gui.Application;
 
@@ -7,8 +6,6 @@ namespace Loom.UI.Terminal.Views.Dialogs;
 
 public class AddTaskDialog : BaseDialog
 {
-    private readonly AddTask _addTask;
-
     private readonly TextField _titleField;
     private readonly TextView _notesView;
     private readonly TextField _dueField;
@@ -17,13 +14,11 @@ public class AddTaskDialog : BaseDialog
     private readonly Button _cancelButton;
 
     public bool TaskCreated { get; private set; }
-    public TaskItem? CreatedTask { get; private set; }
+    public AddTaskRequest? Result { get; private set; }
 
-    public AddTaskDialog(AddTask addTask)
+    public AddTaskDialog()
         : base("Add New Task", defaultHeight: 18, maxWidth: 70)
     {
-        _addTask = addTask;
-
         // === Title ===
         var lblTitle = new Label("Title:") { X = 1, Y = 1 };
         _titleField = new TextField()
@@ -77,7 +72,7 @@ public class AddTaskDialog : BaseDialog
         };
 
         // === Logic ===
-        _saveButton.Clicked += async (_, __) =>
+        _saveButton.Clicked += (_, __) =>
         {
             var title = _titleField.Text.ToString()?.Trim() ?? "";
             var notes = _notesView.Text.ToString()?.Trim();
@@ -92,10 +87,14 @@ public class AddTaskDialog : BaseDialog
             if (DateOnly.TryParse(_dueField.Text.ToString(), out var parsedDue))
                 due = parsedDue;
 
-            var task = await _addTask.Handle(title, notes, due);
-            CreatedTask = task;
-            TaskCreated = true;
+            Result = new AddTaskRequest
+            {
+                Title = title,
+                Notes = notes,
+                Due = due,
+            };
 
+            TaskCreated = true;
             TuiApp.RequestStop(this);
         };
 
@@ -112,7 +111,6 @@ public class AddTaskDialog : BaseDialog
             _saveButton,
             _cancelButton
         );
-
         _titleField.SetFocus();
     }
 }
