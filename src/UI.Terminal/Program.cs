@@ -1,5 +1,6 @@
 using Loom.Application.Interfaces;
 using Loom.Application.Services;
+using Loom.CLI;
 using Loom.Core.Entities.Enums;
 using Loom.Infrastructure.Persistence;
 using Loom.Infrastructure.Persistence.Json;
@@ -17,8 +18,13 @@ namespace Loom.UI.Terminal;
 
 public static class Program
 {
-    public static async Task Main()
+    public static async Task Main(string[] args)
     {
+        if (args.Length > 0)
+        {
+            CliEntryPoint.Run(args);
+            return;
+        }
         // --- Composition Root (manual DI) ---
         var dataDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),

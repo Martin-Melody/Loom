@@ -4,6 +4,7 @@
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\CLI\CLI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
