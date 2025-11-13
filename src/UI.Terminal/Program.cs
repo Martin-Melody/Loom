@@ -1,6 +1,5 @@
 using Loom.Application.Interfaces;
 using Loom.Application.Services;
-using Loom.Application.UseCases.Tasks;
 using Loom.Core.Entities.Enums;
 using Loom.Infrastructure.Persistence;
 using Loom.Infrastructure.Persistence.Json;
@@ -32,48 +31,30 @@ public static class Program
 
         var config = await configRepo.LoadAsync();
 
+        // Infrastructure
         var tasksRepo = new JsonTaskRepository(dataDir);
         IUnitOfWork uow = new JsonUnitOfWork(tasksRepo);
         IDateTimeProvider clock = new SystemClock();
 
-        var createTask = new AddTask(tasksRepo, uow);
-        var editTask = new EditTask(tasksRepo, uow);
-        var filterTasks = new FilterTasks(tasksRepo, clock);
-        var deleteTask = new DeleteTask(tasksRepo, uow);
-        var completeTask = new ToggleCompleteTask(tasksRepo, uow);
+        // Application services
+        ITaskService taskService = new TaskService(tasksRepo, uow, clock);
 
-        // --- Initialise Terminal.Gui ---
+        // --- Initialize Terminal UI ---
         TuiApp.Init();
         LoomTheme.ApplyDarkTheme();
 
-        // --- Build UI ---
-        var listView = new ListView
-        {
-            X = 1,
-            Y = 1,
-            Width = Dim.Fill() - 2,
-            Height = Dim.Fill() - 2,
-        };
-
-        var taskController = new TaskListController(
-            listView,
-            createTask,
-            editTask,
-            deleteTask,
-            completeTask,
-            filterTasks
-        );
+        // --- Controllers ---
+        var taskController = new TaskListController(taskService);
 
         var widgetManager = new WidgetManager();
-
         var commandRegistry = new CommandRegistry();
 
-        var taskListWindow = new TaskListWindow(taskController, listView, commandRegistry);
         var dashboardWindow = new DashboardWindow();
+        var taskListWindow = new TaskListWindow(taskController, commandRegistry);
         var dayViewWindow = new DayViewWindow();
-        var WeekViewWindow = new WeekViewWindow();
-        var MonthViewWindow = new MonthViewWindow();
-        var YearViewWindow = new YearViewWindow();
+        var weekViewWindow = new WeekViewWindow();
+        var monthViewWindow = new MonthViewWindow();
+        var yearViewWindow = new YearViewWindow();
 
         var dashboardController = new DashboardController(widgetManager, dashboardWindow);
 
@@ -97,32 +78,36 @@ public static class Program
             dashboardWindow,
             taskListWindow,
             dayViewWindow,
-            WeekViewWindow,
-            MonthViewWindow,
-            YearViewWindow,
+            weekViewWindow,
+            monthViewWindow,
+            yearViewWindow,
             mainContent,
             commandRegistry,
             sidebarController,
             appState
         );
-        appController.RegisterCommands(taskController, dashboardController);
 
+        // Register commands and load sidebar
+        appController.RegisterCommands(taskController, dashboardController);
         sidebarView.LoadCommands();
 
+        // --- Menu bar and layout ---
         var menuBar = AppMenuBar.Create(commandRegistry);
-
         top.Add(menuBar, sidebarView, mainContent);
 
+        // --- Load last view ---
         appController.ShowView(appState.LastOpenView);
 
-        // --- Run ---
+        // --- Run the app ---
         TuiApp.Run(top);
         TuiApp.Shutdown();
 
+        // --- Persist app state ---
         appState.LastOpenView = appController.CurrentView;
         appState.SidebarState = sidebarController.IsVisible
             ? SidebarState.Opened
             : SidebarState.Closed;
+
         await appState.SaveAsync();
     }
 }
