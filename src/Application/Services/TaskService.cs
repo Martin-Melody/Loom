@@ -27,7 +27,7 @@ public sealed class TaskService : ITaskService
         if (filter is null)
         {
             var today = _clock.Today;
-            items = items.Where(t => t.DueDate == today).ToList();
+            items = items.Where(t => DateOnly.FromDateTime(t.CreatedAt) == today).ToList();
         }
 
         if (filter is not null)
