@@ -33,31 +33,42 @@ public sealed class TaskListCommand : Command<TaskListSettings>
     {
         var service = CliServices.CreateTaskService();
 
-        var filter = new TaskFilter();
+        var hasAnyFilter =
+            settings.Pending
+            || settings.Complete
+            || settings.All
+            || !string.IsNullOrWhiteSpace(settings.Due)
+            || !string.IsNullOrWhiteSpace(settings.Search);
 
-        // status filter
-        if (settings.Pending)
-            filter.IsComplete = false;
-        else if (settings.Complete)
-            filter.IsComplete = true;
-        else if (settings.All)
-            filter.IsComplete = null;
+        TaskFilter? filter = hasAnyFilter ? new TaskFilter() : null;
 
-        // due filter
-        if (!string.IsNullOrWhiteSpace(settings.Due))
+        // only configure filter if it exists
+        if (filter is not null)
         {
-            var clock = new Infrastructure.Time.SystemClock();
-            if (settings.Due.Equals("today", StringComparison.OrdinalIgnoreCase))
-                filter.DueBefore = clock.Today;
-            else if (settings.Due.Equals("tomorrow", StringComparison.OrdinalIgnoreCase))
-                filter.DueBefore = clock.Today.AddDays(1);
-            else if (DateOnly.TryParse(settings.Due, out var parsed))
-                filter.DueBefore = parsed;
-        }
+            // status filter
+            if (settings.Pending)
+                filter.IsComplete = false;
+            else if (settings.Complete)
+                filter.IsComplete = true;
+            else if (settings.All)
+                filter.IsComplete = null;
 
-        // search filter
-        if (!string.IsNullOrWhiteSpace(settings.Search))
-            filter.TextContains = settings.Search;
+            // due filter
+            if (!string.IsNullOrWhiteSpace(settings.Due))
+            {
+                var clock = new Infrastructure.Time.SystemClock();
+                if (settings.Due.Equals("today", StringComparison.OrdinalIgnoreCase))
+                    filter.DueBefore = clock.Today;
+                else if (settings.Due.Equals("tomorrow", StringComparison.OrdinalIgnoreCase))
+                    filter.DueBefore = clock.Today.AddDays(1);
+                else if (DateOnly.TryParse(settings.Due, out var parsed))
+                    filter.DueBefore = parsed;
+            }
+
+            // search filter
+            if (!string.IsNullOrWhiteSpace(settings.Search))
+                filter.TextContains = settings.Search;
+        }
 
         var views = service.GetTasksAsync(filter, cancellationToken).Result;
 
