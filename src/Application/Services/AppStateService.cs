@@ -35,4 +35,6 @@ public class AppStateService
     {
         await _configRepo.SaveAsync(_config, ct);
     }
+
+    public AppConfig Current => _config;
 }
