@@ -2,18 +2,14 @@ using Loom.Application.DTOs.Tasks;
 using Loom.Application.Interfaces;
 using Loom.Core.Entities;
 
-namespace Loom.Application.Services;
-
 public sealed class TaskService : ITaskService
 {
-    private readonly ITaskRepository _repo;
-    private readonly IUnitOfWork _uow;
+    private readonly IStorageProvider _storage;
     private readonly IDateTimeProvider _clock;
 
-    public TaskService(ITaskRepository repo, IUnitOfWork uow, IDateTimeProvider clock)
+    public TaskService(IStorageProvider storage, IDateTimeProvider clock)
     {
-        _repo = repo;
-        _uow = uow;
+        _storage = storage;
         _clock = clock;
     }
 
@@ -22,7 +18,7 @@ public sealed class TaskService : ITaskService
         CancellationToken ct = default
     )
     {
-        var items = await _repo.ListAsync(ct);
+        var items = await _storage.GetTasksAsync(ct);
 
         if (filter is null)
         {
@@ -54,55 +50,24 @@ public sealed class TaskService : ITaskService
         return items.Select(t => new TaskView(t)).ToList();
     }
 
-    public async Task<TaskView> AddTaskAsync(AddTaskRequest req, CancellationToken ct = default)
+    public async Task<TaskView> AddTaskAsync(AddTaskRequest request, CancellationToken ct = default)
     {
-        var entity = new TaskItem
-        {
-            Id = Guid.NewGuid(),
-            Title = req.Title,
-            Notes = req.Notes,
-            DueDate = req.Due,
-            Status = TaskItemStatus.Pending,
-            CreatedAt = _clock.UtcNow,
-        };
-
-        await _repo.AddAsync(entity, ct);
-        await _uow.SaveChangesAsync(ct);
-        return new TaskView(entity);
+        var item = await _storage.AddTaskAsync(request, ct);
+        return new TaskView(item);
     }
 
-    public async Task<TaskView> UpdateTaskAsync(EditTaskRequest req, CancellationToken ct = default)
+    public async Task<TaskView> UpdateTaskAsync(
+        EditTaskRequest request,
+        CancellationToken ct = default
+    )
     {
-        var entity =
-            await _repo.GetByIdAsync(req.Id, ct)
-            ?? throw new InvalidOperationException("Task not found.");
-
-        entity.Title = req.Title ?? "";
-        entity.Notes = req.Notes;
-        entity.DueDate = req.Due;
-        entity.UpdatedAt = _clock.UtcNow;
-
-        await _repo.UpdateAsync(entity, ct);
-        await _uow.SaveChangesAsync(ct);
-        return new TaskView(entity);
+        var item = await _storage.UpdateTaskAsync(request, ct);
+        return new TaskView(item);
     }
 
-    public async Task DeleteTaskAsync(Guid id, CancellationToken ct = default)
-    {
-        await _repo.DeleteAsync(id, ct);
-        await _uow.SaveChangesAsync(ct);
-    }
+    public Task DeleteTaskAsync(Guid id, CancellationToken ct = default) =>
+        _storage.DeleteTaskAsync(id, ct);
 
-    public async Task ToggleCompleteAsync(Guid id, CancellationToken ct = default)
-    {
-        var entity = await _repo.GetByIdAsync(id, ct);
-        if (entity is null)
-            return;
-
-        entity.ToggleComplete();
-        entity.UpdatedAt = _clock.UtcNow;
-
-        await _repo.UpdateAsync(entity, ct);
-        await _uow.SaveChangesAsync(ct);
-    }
+    public Task ToggleCompleteAsync(Guid id, CancellationToken ct = default) =>
+        _storage.ToggleCompleteAsync(id, ct);
 }
