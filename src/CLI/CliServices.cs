@@ -1,6 +1,6 @@
 using Loom.Application.Interfaces;
-using Loom.Application.Services;
 using Loom.Infrastructure.Persistence.Json;
+using Loom.Infrastructure.Persistence.Providers;
 using Loom.Infrastructure.Time;
 
 namespace Loom.CLI;
@@ -16,8 +16,9 @@ internal static class CliServices
 
         var repo = new JsonTaskRepository(dataDir);
         IUnitOfWork uow = new JsonUnitOfWork(repo);
+        var storage = new LocalStorageProvider(repo, uow);
         IDateTimeProvider clock = new SystemClock();
 
-        return new TaskService(repo, uow, clock);
+        return new TaskService(storage, clock);
     }
 }

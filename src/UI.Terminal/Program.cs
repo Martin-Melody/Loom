@@ -4,6 +4,7 @@ using Loom.CLI;
 using Loom.Core.Entities.Enums;
 using Loom.Infrastructure.Persistence;
 using Loom.Infrastructure.Persistence.Json;
+using Loom.Infrastructure.Persistence.Providers;
 using Loom.Infrastructure.Registry;
 using Loom.Infrastructure.Time;
 using Loom.UI.Terminal.Controllers;
@@ -40,10 +41,11 @@ public static class Program
         // Infrastructure
         var tasksRepo = new JsonTaskRepository(dataDir);
         IUnitOfWork uow = new JsonUnitOfWork(tasksRepo);
+        var storageProvider = new LocalStorageProvider(tasksRepo, uow);
         IDateTimeProvider clock = new SystemClock();
 
         // Application services
-        ITaskService taskService = new TaskService(tasksRepo, uow, clock);
+        ITaskService taskService = new TaskService(storageProvider, clock);
 
         // --- Initialize Terminal UI ---
         TuiApp.Init();
