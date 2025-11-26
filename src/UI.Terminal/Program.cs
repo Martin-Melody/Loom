@@ -21,30 +21,53 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
+        // --- CLI Invocation ---
         if (args.Length > 0)
         {
             CliEntryPoint.Run(args);
             return;
         }
-        // --- Composition Root (manual DI) ---
-        var dataDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".loom"
-        );
 
+        // --- Load Config ---
         var configRepo = new ConfigRepository();
         var appState = new AppStateService(configRepo);
         await appState.InitalizeAsync();
 
         var config = appState.Current;
 
-        // Infrastructure
-        var tasksRepo = new JsonTaskRepository(dataDir);
-        IUnitOfWork uow = new JsonUnitOfWork(tasksRepo);
-        var storageProvider = new LocalStorageProvider(tasksRepo, uow);
+        // Determine data directory
+        var dataDir = string.IsNullOrWhiteSpace(config.DataDirectory)
+            ? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".loom"
+            )
+            : config.DataDirectory;
+
+        // --- Choose Storage Provider (Local or Remote) ---
+        IStorageProvider storageProvider;
         IDateTimeProvider clock = new SystemClock();
 
-        // Application services
+        switch (config.Mode)
+        {
+            case ConnectionMode.Remote:
+                if (string.IsNullOrWhiteSpace(config.ServerUrl))
+                    throw new InvalidOperationException(
+                        "ConnectionMode.Remote requires a ServerUrl in config.json"
+                    );
+
+                var http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+                storageProvider = new RemoteApiProvider(http, config.ServerUrl!, config.ApiKey);
+                break;
+
+            case ConnectionMode.Local:
+            default:
+                var tasksRepo = new JsonTaskRepository(dataDir);
+                IUnitOfWork uow = new JsonUnitOfWork(tasksRepo);
+                storageProvider = new LocalStorageProvider(tasksRepo, uow);
+                break;
+        }
+
+        // --- Application Service Layer ---
         ITaskService taskService = new TaskService(storageProvider, clock);
 
         // --- Initialize Terminal UI ---
@@ -53,7 +76,6 @@ public static class Program
 
         // --- Controllers ---
         var taskController = new TaskListController(taskService);
-
         var widgetManager = new WidgetManager();
         var commandRegistry = new CommandRegistry();
 
@@ -66,9 +88,8 @@ public static class Program
 
         var dashboardController = new DashboardController(widgetManager, dashboardWindow);
 
-        // --- Root View ---
+        // --- Root View Setup ---
         var top = Toplevel.Create();
-
         var sidebarView = new SidebarView(commandRegistry);
 
         var mainContent = new FrameView
@@ -95,22 +116,22 @@ public static class Program
             appState
         );
 
-        // Register commands and load sidebar
+        // Register commands + load sidebar
         appController.RegisterCommands(taskController, dashboardController);
         sidebarView.LoadCommands();
 
-        // --- Menu bar and layout ---
+        // --- Menu bar ---
         var menuBar = AppMenuBar.Create(commandRegistry);
         top.Add(menuBar, sidebarView, mainContent);
 
         // --- Load last view ---
         appController.ShowView(appState.LastOpenView);
 
-        // --- Run the app ---
+        // --- Run the App ---
         TuiApp.Run(top);
         TuiApp.Shutdown();
 
-        // --- Persist app state ---
+        // --- Persist App State ---
         appState.LastOpenView = appController.CurrentView;
         appState.SidebarState = sidebarController.IsVisible
             ? SidebarState.Opened
