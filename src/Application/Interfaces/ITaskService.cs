@@ -11,5 +11,5 @@ public interface ITaskService
     Task<TaskView> AddTaskAsync(AddTaskRequest request, CancellationToken ct = default);
     Task<TaskView> UpdateTaskAsync(EditTaskRequest request, CancellationToken ct = default);
     Task DeleteTaskAsync(Guid id, CancellationToken ct = default);
-    Task ToggleCompleteAsync(Guid id, CancellationToken ct = default);
+    Task<TaskView> ToggleCompleteAsync(Guid id, CancellationToken ct = default);
 }
