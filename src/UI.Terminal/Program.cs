@@ -35,7 +35,7 @@ public static class Program
         var appState = new AppStateService(configRepo);
         await appState.InitalizeAsync();
 
-        var config = await configRepo.LoadAsync();
+        var config = appState.Current;
 
         // Infrastructure
         var tasksRepo = new JsonTaskRepository(dataDir);
