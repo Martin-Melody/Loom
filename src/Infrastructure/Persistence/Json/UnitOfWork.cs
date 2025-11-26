@@ -4,17 +4,15 @@ namespace Loom.Infrastructure.Persistence.Json;
 
 public sealed class JsonUnitOfWork : IUnitOfWork
 {
-    private readonly JsonTaskRepository _tasks;
+    private readonly ITaskRepository _tasks;
 
-    public JsonUnitOfWork(JsonTaskRepository tasks)
+    public JsonUnitOfWork(ITaskRepository tasks)
     {
         _tasks = tasks;
     }
 
-    public async Task SaveChangesAsync(CancellationToken ct = default)
+    public Task SaveChangesAsync(CancellationToken ct = default)
     {
-        await _tasks.CommitAsync(ct);
-        // When you add Habit/Project repos, commit them here too.
+        return _tasks.CommitAsync(ct);
     }
 }
-

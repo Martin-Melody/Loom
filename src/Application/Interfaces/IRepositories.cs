@@ -9,6 +9,7 @@ public interface IRepository<T>
     Task AddAsync(T entity, CancellationToken ct = default);
     Task UpdateAsync(T entity, CancellationToken ct = default);
     Task DeleteAsync(Guid id, CancellationToken ct = default);
+    Task CommitAsync(CancellationToken ct = default);
 }
 
 public interface ITaskRepository : IRepository<TaskItem>
@@ -18,6 +19,7 @@ public interface ITaskRepository : IRepository<TaskItem>
 }
 
 public interface IHabbitRepository : IRepository<Habbit> { }
+
 public interface IProjectRepository : IRepository<Project> { }
 
 public interface IUnitOfWork
@@ -30,4 +32,3 @@ public interface IDateTimeProvider
     DateTime UtcNow { get; }
     DateOnly Today { get; }
 }
-
