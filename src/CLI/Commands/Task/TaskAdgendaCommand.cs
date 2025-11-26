@@ -7,15 +7,15 @@ namespace Loom.CLI.Commands.Task;
 
 public sealed class TaskAgendaSettings : CommandSettings { }
 
-public sealed class TaskAgendaCommand : Command<TaskAgendaSettings>
+public sealed class TaskAgendaCommand : AsyncCommand<TaskAgendaSettings>
 {
-    public override int Execute(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         TaskAgendaSettings settings,
         CancellationToken cancellationToken
     )
     {
-        var service = CliServices.CreateTaskService();
+        var service = await CliServices.CreateTaskServiceAsync();
         var clock = new Loom.Infrastructure.Time.SystemClock();
 
         // Fetch ALL tasks

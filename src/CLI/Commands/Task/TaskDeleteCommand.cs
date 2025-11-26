@@ -11,7 +11,7 @@ public sealed class TaskDeleteSettings : CommandSettings
     public string Search { get; set; } = string.Empty;
 }
 
-public sealed class TaskDeleteCommand : Command<TaskDeleteSettings>
+public sealed class TaskDeleteCommand : AsyncCommand<TaskDeleteSettings>
 {
     public override ValidationResult Validate(CommandContext context, TaskDeleteSettings settings)
     {
@@ -21,13 +21,13 @@ public sealed class TaskDeleteCommand : Command<TaskDeleteSettings>
         return ValidationResult.Success();
     }
 
-    public override int Execute(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         TaskDeleteSettings settings,
         CancellationToken cancellationToken
     )
     {
-        var service = CliServices.CreateTaskService();
+        var service = await CliServices.CreateTaskServiceAsync();
 
         // Fetch all tasks
         var views = service
