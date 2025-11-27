@@ -16,7 +16,7 @@ public sealed class TaskAddSettings : CommandSettings
     public string? Notes { get; set; }
 }
 
-public sealed class TaskAddCommand : Command<TaskAddSettings>
+public sealed class TaskAddCommand : AsyncCommand<TaskAddSettings>
 {
     public override ValidationResult Validate(CommandContext context, TaskAddSettings settings)
     {
@@ -26,13 +26,13 @@ public sealed class TaskAddCommand : Command<TaskAddSettings>
         return ValidationResult.Success();
     }
 
-    public override int Execute(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         TaskAddSettings settings,
         CancellationToken cancellationToken
     )
     {
-        var service = CliServices.CreateTaskService();
+        var service = await CliServices.CreateTaskServiceAsync();
         var clock = new Infrastructure.Time.SystemClock();
 
         DateOnly? due = null;

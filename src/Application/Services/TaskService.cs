@@ -68,6 +68,9 @@ public sealed class TaskService : ITaskService
     public Task DeleteTaskAsync(Guid id, CancellationToken ct = default) =>
         _storage.DeleteTaskAsync(id, ct);
 
-    public Task ToggleCompleteAsync(Guid id, CancellationToken ct = default) =>
-        _storage.ToggleCompleteAsync(id, ct);
+    public async Task<TaskView> ToggleCompleteAsync(Guid id, CancellationToken ct = default)
+    {
+        var item = await _storage.ToggleCompleteAsync(id, ct);
+        return new TaskView(item);
+    }
 }

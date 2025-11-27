@@ -20,7 +20,7 @@ public sealed class TaskEditSettings : CommandSettings
     public string? Due { get; set; }
 }
 
-public sealed class TaskEditCommand : Command<TaskEditSettings>
+public sealed class TaskEditCommand : AsyncCommand<TaskEditSettings>
 {
     public override ValidationResult Validate(CommandContext context, TaskEditSettings settings)
     {
@@ -33,13 +33,13 @@ public sealed class TaskEditCommand : Command<TaskEditSettings>
         return ValidationResult.Success();
     }
 
-    public override int Execute(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         TaskEditSettings settings,
         CancellationToken cancellationToken
     )
     {
-        var service = CliServices.CreateTaskService();
+        var service = await CliServices.CreateTaskServiceAsync();
         var clock = new Loom.Infrastructure.Time.SystemClock();
 
         // Load all tasks

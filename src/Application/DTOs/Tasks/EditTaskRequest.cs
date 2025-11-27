@@ -1,6 +1,6 @@
 namespace Loom.Application.DTOs.Tasks;
 
-public sealed class EditTaskRequest
+public sealed record EditTaskRequest
 {
     public Guid Id { get; init; }
     public string? Title { get; init; }

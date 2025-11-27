@@ -1,6 +1,6 @@
 namespace Loom.Application.DTOs.Tasks;
 
-public sealed class AddTaskRequest
+public sealed record AddTaskRequest
 {
     public string Title { get; init; } = "";
     public string? Notes { get; init; }

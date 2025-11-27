@@ -11,7 +11,7 @@ public sealed class TaskInfoSettings : CommandSettings
     public string Search { get; set; } = string.Empty;
 }
 
-public sealed class TaskInfoCommand : Command<TaskInfoSettings>
+public sealed class TaskInfoCommand : AsyncCommand<TaskInfoSettings>
 {
     public override ValidationResult Validate(CommandContext context, TaskInfoSettings settings)
     {
@@ -21,13 +21,13 @@ public sealed class TaskInfoCommand : Command<TaskInfoSettings>
         return ValidationResult.Success();
     }
 
-    public override int Execute(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         TaskInfoSettings settings,
         CancellationToken cancellationToken
     )
     {
-        var service = CliServices.CreateTaskService();
+        var service = await CliServices.CreateTaskServiceAsync();
 
         // Load all tasks
         var views = service

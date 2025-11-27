@@ -11,7 +11,7 @@ public sealed class TaskCompleteSettings : CommandSettings
     public string Search { get; set; } = string.Empty;
 }
 
-public sealed class TaskCompleteCommand : Command<TaskCompleteSettings>
+public sealed class TaskCompleteCommand : AsyncCommand<TaskCompleteSettings>
 {
     public override ValidationResult Validate(CommandContext context, TaskCompleteSettings settings)
     {
@@ -21,13 +21,13 @@ public sealed class TaskCompleteCommand : Command<TaskCompleteSettings>
         return ValidationResult.Success();
     }
 
-    public override int Execute(
+    public override async Task<int> ExecuteAsync(
         CommandContext context,
         TaskCompleteSettings settings,
         CancellationToken cancellationToken
     )
     {
-        var service = CliServices.CreateTaskService();
+        var service = await CliServices.CreateTaskServiceAsync();
 
         // Fetch all tasks
         var views = service
