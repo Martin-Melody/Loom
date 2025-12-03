@@ -61,6 +61,14 @@ public static class GlobalCommandDefinitions
                 isGlobalShortcut: true
             ),
             new CommandDefinition(
+                CommandIds.Settings.ShowConnectionSettings,
+                "Open Connection Settings",
+                "Settings",
+                app.ShowConnectionSettings,
+                shortcut: "Ctrl+4",
+                isGlobalShortcut: true
+            ),
+            new CommandDefinition(
                 CommandIds.Navigation.ToggleSidebar,
                 "Toggle Sidebar",
                 "Navigation",
