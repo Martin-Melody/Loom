@@ -22,6 +22,7 @@ public class AppController
 
     private readonly ViewNavigator _navigator;
     private readonly CommandPaletteController _palette;
+    private readonly ConnectionSettingsController _connectionSettings;
     private readonly GlobalShortcutManager _shortcuts;
     private readonly AppStateService _state;
 
@@ -52,6 +53,7 @@ public class AppController
 
         _navigator = new ViewNavigator(mainContent);
         _palette = new CommandPaletteController(commands);
+        _connectionSettings = new ConnectionSettingsController(state);
         _shortcuts = new GlobalShortcutManager(commands);
     }
 
@@ -100,6 +102,8 @@ public class AppController
     }
 
     public void ShowCommandPalette() => _palette.Show();
+
+    public void ShowConnectionSettings() => _connectionSettings.Show();
 
     public void ToggleSidebar() => _sidebarController.Toggle();
 
