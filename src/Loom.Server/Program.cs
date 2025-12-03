@@ -24,16 +24,19 @@ builder.Services.AddServerHealthChecks();
 // 5) Register API Key middleware HERE
 builder.Services.AddApiKeyAuth();
 
+// 6) Adding Cors
+builder.Services.AddLoomCors();
+
 var app = builder.Build();
 
-// 6) Swagger
+// 7) Swagger
 app.UseSwaggerDocumentation();
 
-// 7) API Key auth middleware
+// 8) API Key auth middleware
 app.UseApiKeyAuth();
 
-// 8) Routes
+// 9) Routes
 app.MapTaskEndpoints();
 app.MapHealthChecks("/health");
 
-app.Run();
+app.Run("http://0.0.0.0:5184");
