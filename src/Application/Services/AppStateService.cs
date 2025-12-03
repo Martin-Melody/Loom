@@ -31,6 +31,24 @@ public class AppStateService
         set => _config.SidebarState = value;
     }
 
+    public ConnectionMode ConnectionMode
+    {
+        get => _config.Mode;
+        set => _config.Mode = value;
+    }
+
+    public string? ServerUrl
+    {
+        get => _config.ServerUrl;
+        set => _config.ServerUrl = value;
+    }
+
+    public string? ApiKey
+    {
+        get => _config.ApiKey;
+        set => _config.ApiKey = value;
+    }
+
     public async Task SaveAsync(CancellationToken ct = default)
     {
         await _configRepo.SaveAsync(_config, ct);
