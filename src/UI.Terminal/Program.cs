@@ -103,6 +103,9 @@ public static class Program
             BorderStyle = LineStyle.None,
         };
 
+        var initialModeLabel = config.Mode == ConnectionMode.Remote ? "Remote" : "Local";
+        var statusBar = AppStatusBar.Create(initialModeLabel, out var updateStatus);
+
         var sidebarController = new SidebarController(sidebarView, mainContent, appState);
 
         var appController = new AppController(
@@ -115,7 +118,8 @@ public static class Program
             mainContent,
             commandRegistry,
             sidebarController,
-            appState
+            appState,
+            updateStatus
         );
 
         // Register commands + load sidebar
@@ -124,7 +128,7 @@ public static class Program
 
         // Menu bar
         var menuBar = AppMenuBar.Create(commandRegistry);
-        top.Add(menuBar, sidebarView, mainContent);
+        top.Add(menuBar, sidebarView, mainContent, statusBar);
 
         // Load last view
         appController.ShowView(appState.LastOpenView);

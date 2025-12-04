@@ -20,14 +20,12 @@ public sealed class ConnectionSettingsController
         _updateStatusBar = updateStatusBar;
     }
 
-    // Entry point - identical to CommandPaletteController.Show()
     public void Show()
     {
         var dialog = new ConnectionSettingsDialog();
 
         // Preload values
         dialog.ModeRadio.SelectedItem = _appState.ConnectionMode == ConnectionMode.Remote ? 1 : 0;
-
         dialog.UrlField.Text = _appState.ServerUrl ?? "";
         dialog.ApiKeyField.Text = _appState.ApiKey ?? "";
 
@@ -36,7 +34,7 @@ public sealed class ConnectionSettingsController
         dialog.SaveButton.Clicked += async (_, __) => await Save(dialog);
         dialog.CloseButton.Clicked += (_, __) => TuiApp.RequestStop(dialog);
 
-        TuiApp.Run(dialog); // Show modal dialog
+        TuiApp.Run(dialog);
     }
 
     private async Task Test(ConnectionSettingsDialog dialog)
@@ -47,7 +45,6 @@ public sealed class ConnectionSettingsController
         if (mode == ConnectionMode.Local)
         {
             dialog.StatusLabel.Text = "Local mode: nothing to test.";
-            _updateStatusBar?.Invoke(true, "Local");
             return;
         }
 
@@ -69,20 +66,21 @@ public sealed class ConnectionSettingsController
         if (result.Success)
         {
             dialog.StatusLabel.Text = "✓ Connected successfully";
-            _updateStatusBar?.Invoke(true, "Remote");
         }
         else
         {
             dialog.StatusLabel.Text = $"✗ Failed: {result.Error}";
-            _updateStatusBar?.Invoke(false, "Remote");
         }
     }
 
     private async Task Save(ConnectionSettingsDialog dialog)
     {
-        _appState.ConnectionMode =
+        var previousMode = _appState.ConnectionMode;
+
+        var newMode =
             dialog.ModeRadio.SelectedItem == 1 ? ConnectionMode.Remote : ConnectionMode.Local;
 
+        _appState.ConnectionMode = newMode;
         _appState.ServerUrl = dialog.UrlField.Text.ToString();
         _appState.ApiKey = dialog.ApiKeyField.Text.ToString();
 

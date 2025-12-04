@@ -38,7 +38,8 @@ public class AppController
         View mainContent,
         ICommandRegistry commands,
         SidebarController sidebarController,
-        AppStateService state
+        AppStateService state,
+        Action<bool, string> updateStatusBar
     )
     {
         _dashboard = dashboard;
@@ -53,7 +54,7 @@ public class AppController
 
         _navigator = new ViewNavigator(mainContent);
         _palette = new CommandPaletteController(commands);
-        _connectionSettings = new ConnectionSettingsController(state);
+        _connectionSettings = new ConnectionSettingsController(state, updateStatusBar);
         _shortcuts = new GlobalShortcutManager(commands);
     }
 
