@@ -66,7 +66,14 @@ public static class AppMenuBar
                 // --- SETTINGS ---
                 new MenuBarItem(
                     "_Settings",
-                    new[] { CreateMenuItem("_Save Config", CommandIds.Settings.SaveConfig) }
+                    new[]
+                    {
+                        CreateMenuItem("_Save Config", CommandIds.Settings.SaveConfig),
+                        CreateMenuItem(
+                            "_Connection Settings",
+                            CommandIds.Settings.ShowConnectionSettings
+                        ),
+                    }
                 ),
                 // --- TOOLS ---
                 new MenuBarItem(

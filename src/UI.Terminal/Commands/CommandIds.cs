@@ -44,6 +44,7 @@ public static class CommandIds
     public static class Settings
     {
         public const string SaveConfig = "settings.saveConfig";
+        public const string ShowConnectionSettings = "settings.connectionSettings";
     }
 
     public static class Tools

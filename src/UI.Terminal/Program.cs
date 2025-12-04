@@ -43,42 +43,44 @@ public static class Program
             )
             : config.DataDirectory;
 
-        // --- Choose Storage Provider (Local or Remote) ---
         IStorageProvider storageProvider;
+        IConnectionTester connectionTester;
         IDateTimeProvider clock = new SystemClock();
 
-        switch (config.Mode)
+        if (config.Mode == ConnectionMode.Remote)
         {
-            case ConnectionMode.Remote:
-                if (string.IsNullOrWhiteSpace(config.ServerUrl))
-                    throw new InvalidOperationException(
-                        "ConnectionMode.Remote requires a ServerUrl in config.json"
-                    );
+            if (string.IsNullOrWhiteSpace(config.ServerUrl))
+                throw new InvalidOperationException(
+                    "ConnectionMode.Remote requires a ServerUrl in config.json"
+                );
 
-                var http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-                storageProvider = new RemoteApiProvider(http, config.ServerUrl!, config.ApiKey);
-                break;
+            var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
 
-            case ConnectionMode.Local:
-            default:
-                var tasksRepo = new JsonTaskRepository(dataDir);
-                IUnitOfWork uow = new JsonUnitOfWork(tasksRepo);
-                storageProvider = new LocalStorageProvider(tasksRepo, uow);
-                break;
+            var remote = new RemoteApiProvider(httpClient, config.ServerUrl!, config.ApiKey);
+
+            storageProvider = remote;
+            connectionTester = remote;
+        }
+        else
+        {
+            var repo = new JsonTaskRepository(dataDir);
+            IUnitOfWork uow = new JsonUnitOfWork(repo);
+            storageProvider = new LocalStorageProvider(repo, uow);
+            connectionTester = new DummyConnectionTester();
         }
 
-        // --- Application Service Layer ---
+        // Application Services
         ITaskService taskService = new TaskService(storageProvider, clock);
 
-        // --- Initialize Terminal UI ---
         TuiApp.Init();
         LoomTheme.ApplyDarkTheme();
 
-        // --- Controllers ---
+        // Controllers
         var taskController = new TaskListController(taskService);
         var widgetManager = new WidgetManager();
         var commandRegistry = new CommandRegistry();
 
+        // Windows
         var dashboardWindow = new DashboardWindow();
         var taskListWindow = new TaskListWindow(taskController, commandRegistry);
         var dayViewWindow = new DayViewWindow();
@@ -88,7 +90,7 @@ public static class Program
 
         var dashboardController = new DashboardController(widgetManager, dashboardWindow);
 
-        // --- Root View Setup ---
+        // Layout
         var top = Toplevel.Create();
         var sidebarView = new SidebarView(commandRegistry);
 
@@ -100,6 +102,9 @@ public static class Program
             Height = Dim.Fill(),
             BorderStyle = LineStyle.None,
         };
+
+        var initialModeLabel = config.Mode == ConnectionMode.Remote ? "Remote" : "Local";
+        var statusBar = AppStatusBar.Create(initialModeLabel, out var updateStatus);
 
         var sidebarController = new SidebarController(sidebarView, mainContent, appState);
 
@@ -113,25 +118,26 @@ public static class Program
             mainContent,
             commandRegistry,
             sidebarController,
-            appState
+            appState,
+            updateStatus
         );
 
         // Register commands + load sidebar
         appController.RegisterCommands(taskController, dashboardController);
         sidebarView.LoadCommands();
 
-        // --- Menu bar ---
+        // Menu bar
         var menuBar = AppMenuBar.Create(commandRegistry);
-        top.Add(menuBar, sidebarView, mainContent);
+        top.Add(menuBar, sidebarView, mainContent, statusBar);
 
-        // --- Load last view ---
+        // Load last view
         appController.ShowView(appState.LastOpenView);
 
-        // --- Run the App ---
+        // Run the app
         TuiApp.Run(top);
         TuiApp.Shutdown();
 
-        // --- Persist App State ---
+        // Persist UI state
         appState.LastOpenView = appController.CurrentView;
         appState.SidebarState = sidebarController.IsVisible
             ? SidebarState.Opened
