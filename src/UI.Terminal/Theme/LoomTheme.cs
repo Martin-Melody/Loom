@@ -16,7 +16,7 @@ public static class LoomTheme
             Focus = new(Color.Black, Color.Green),
             HotNormal = new(Color.BrightGreen, Color.Gray),
             HotFocus = new(Color.BrightGreen, Color.Green),
-            Disabled = new(Color.Gray, Color.Black)
+            Disabled = new(Color.Gray, Color.Black),
         };
 
         Colors.Dialog = new ColorScheme()
@@ -25,7 +25,7 @@ public static class LoomTheme
             Focus = new(Color.Black, Color.Green),
             HotNormal = new(Color.Green, Color.Gray),
             HotFocus = new(Color.Black, Color.Green),
-            Disabled = new(Color.Gray, Color.Black)
+            Disabled = new(Color.Gray, Color.Black),
         };
 
         Colors.Menu = new ColorScheme()
@@ -34,13 +34,13 @@ public static class LoomTheme
             Focus = new(Color.Black, Color.Green),
             HotNormal = new(Color.BrightGreen, Color.Black),
             HotFocus = new(Color.BrightGreen, Color.Green),
-            Disabled = new(Color.Gray, Color.Black)
+            Disabled = new(Color.Gray, Color.Black),
         };
 
         Colors.Error = new ColorScheme()
         {
             Normal = new(Color.BrightRed, Color.Black),
-            Focus = new(Color.White, Color.Red)
+            Focus = new(Color.White, Color.Red),
         };
     }
 
@@ -54,7 +54,7 @@ public static class LoomTheme
             Focus = new(Color.Black, Color.BrightGreen),
             HotNormal = new(Color.Green, Color.Black),
             HotFocus = new(Color.Black, Color.BrightGreen),
-            Disabled = new(Color.Gray, Color.Black)
+            Disabled = new(Color.Gray, Color.Black),
         };
 
         Colors.Dialog = new ColorScheme()
@@ -63,8 +63,31 @@ public static class LoomTheme
             Focus = new(Color.Black, Color.BrightGreen),
             HotNormal = new(Color.Green, Color.Black),
             HotFocus = new(Color.Black, Color.BrightGreen),
-            Disabled = new(Color.Gray, Color.Black)
+            Disabled = new(Color.Gray, Color.Black),
+        };
+
+        LoomColors.NotificationError = new ColorScheme()
+        {
+            Normal = new(Color.White, Color.Red),
+            Focus = new(Color.White, Color.BrightRed),
+        };
+
+        LoomColors.NotificationWarning = new ColorScheme()
+        {
+            Normal = new(Color.Black, Color.BrightYellow),
+            Focus = new(Color.Black, Color.Brown),
+        };
+
+        LoomColors.NotificationSuccess = new ColorScheme()
+        {
+            Normal = new(Color.Black, Color.BrightGreen),
+            Focus = new(Color.Black, Color.Green),
+        };
+
+        LoomColors.NotificationInfo = new ColorScheme()
+        {
+            Normal = new(Color.White, Color.DarkGray),
+            Focus = new(Color.White, Color.Gray),
         };
     }
 }
-
