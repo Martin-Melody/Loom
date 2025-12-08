@@ -17,6 +17,7 @@ public class AppController
     private readonly MonthViewWindow _monthView;
     private readonly YearViewWindow _yearView;
     private readonly SidebarController _sidebarController;
+    private readonly NotificationHistoryController _notificationHistoryController;
 
     private readonly ICommandRegistry _commands;
 
@@ -38,6 +39,7 @@ public class AppController
         View mainContent,
         ICommandRegistry commands,
         SidebarController sidebarController,
+        NotificationHistoryController notificationHistoryController,
         AppStateService state,
         Action<bool, string> updateStatusBar
     )
@@ -50,6 +52,7 @@ public class AppController
         _yearView = yearView;
         _commands = commands;
         _sidebarController = sidebarController;
+        _notificationHistoryController = notificationHistoryController;
         _state = state;
 
         _navigator = new ViewNavigator(mainContent);
@@ -77,6 +80,12 @@ public class AppController
 
     public void ShowYear() => Show(ViewType.YearView, _yearView, "YearView");
 
+    public void ShowNotificationHistory()
+    {
+        var win = _notificationHistoryController.CreateWindow();
+        Show(ViewType.NotificationHistory, win, "NotificationHistory");
+    }
+
     public void ShowView(ViewType viewType)
     {
         switch (viewType)
@@ -95,6 +104,9 @@ public class AppController
                 break;
             case ViewType.YearView:
                 ShowYear();
+                break;
+            case ViewType.NotificationHistory:
+                ShowNotificationHistory();
                 break;
             default:
                 ShowDashboard();
@@ -116,7 +128,8 @@ public class AppController
 
     public void RegisterCommands(
         TaskListController taskController,
-        DashboardController dashboardController
+        DashboardController dashboardController,
+        NotificationHistoryController notificationHistoryController
     )
     {
         foreach (var cmd in GlobalCommandDefinitions.Create(this))
@@ -133,6 +146,14 @@ public class AppController
         foreach (
             var cmd in DashboardCommandDefinitions.Create(
                 dashboardController,
+                () => CurrentView == ViewType.Dashboard
+            )
+        )
+            _commands.Register(cmd);
+
+        foreach (
+            var cmd in NotificationHistoryCommandDefinitions.Create(
+                notificationHistoryController,
                 () => CurrentView == ViewType.Dashboard
             )
         )

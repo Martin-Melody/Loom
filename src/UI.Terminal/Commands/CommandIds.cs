@@ -15,9 +15,16 @@ public static class CommandIds
         public const string ShowWeek = "navigation.week";
         public const string ShowMonth = "navigation.month";
         public const string ShowYear = "navigation.year";
+        public const string ShowNotificationHistory = "navigation.notificationHistory";
         public const string ToggleSidebar = "navigation.toggleSidebar";
         public const string FocusSidebar = "navigation.focusSidebar";
         public const string FocusMainContent = "navigation.focusMainContent";
+    }
+
+    public static class notificationHistory
+    {
+        public const string DismissAll = "notificationHistory.dismiss.all";
+        public const string DismissLast = "notificationHistory.dismiss.Last";
     }
 
     public static class Tasks
