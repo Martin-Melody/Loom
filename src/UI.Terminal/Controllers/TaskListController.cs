@@ -7,6 +7,7 @@ namespace Loom.UI.Terminal.Controllers;
 public class TaskListController
 {
     private readonly ITaskService _service;
+    private readonly INotificationService _notify;
     private List<TaskView> _views = new();
 
     private TaskFilter? _currentFilter;
@@ -32,9 +33,10 @@ public class TaskListController
             _selectedIndex = index;
     }
 
-    public TaskListController(ITaskService service)
+    public TaskListController(ITaskService service, INotificationService notify)
     {
         _service = service;
+        _notify = notify;
     }
 
     public async Task LoadTasksAsync(TaskFilter? filter = null)
@@ -74,6 +76,7 @@ public class TaskListController
 
         await _service.AddTaskAsync(request);
         await LoadTasksAsync(_currentFilter);
+        _notify.Success("Task Added!");
     }
 
     public async Task EditTaskAsync(TaskItem item)
@@ -84,6 +87,7 @@ public class TaskListController
 
         await _service.UpdateTaskAsync(request);
         await LoadTasksAsync(_currentFilter);
+        _notify.Success("Task Edited!");
     }
 
     public async Task DeleteTaskAsync(TaskItem item)
@@ -96,12 +100,14 @@ public class TaskListController
 
         await _service.DeleteTaskAsync(item.Id);
         await LoadTasksAsync(_currentFilter);
+        _notify.Warn("Task Deleted!");
     }
 
     public async Task ToggleCompleteAsync(TaskItem item)
     {
         await _service.ToggleCompleteAsync(item.Id);
         await LoadTasksAsync(_currentFilter);
+        _notify.Info("Task Toggled!");
     }
 
     public void ToggleExpandCollapse()
