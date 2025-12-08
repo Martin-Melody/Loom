@@ -9,4 +9,5 @@ public enum ViewType
     MonthView,
     YearView,
     SeedList,
+    NotificationHistory,
 }

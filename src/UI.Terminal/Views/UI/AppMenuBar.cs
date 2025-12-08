@@ -61,6 +61,10 @@ public static class AppMenuBar
                         CreateMenuItem("_Week View", CommandIds.Navigation.ShowWeek),
                         CreateMenuItem("_Month View", CommandIds.Navigation.ShowMonth),
                         CreateMenuItem("_Year View", CommandIds.Navigation.ShowYear),
+                        CreateMenuItem(
+                            "_Notification History",
+                            CommandIds.Navigation.ShowNotificationHistory
+                        ),
                     }
                 ),
                 // --- SETTINGS ---

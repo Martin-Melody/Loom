@@ -69,6 +69,8 @@ public static class Program
             connectionTester = new DummyConnectionTester();
         }
 
+        INotificationService notificationService = new NotificationService();
+
         // Application Services
         ITaskService taskService = new TaskService(storageProvider, clock);
 
@@ -76,7 +78,8 @@ public static class Program
         LoomTheme.ApplyDarkTheme();
 
         // Controllers
-        var taskController = new TaskListController(taskService);
+        var taskController = new TaskListController(taskService, notificationService);
+        var notificationHistoryController = new NotificationHistoryController(notificationService);
         var widgetManager = new WidgetManager();
         var commandRegistry = new CommandRegistry();
 
@@ -87,12 +90,14 @@ public static class Program
         var weekViewWindow = new WeekViewWindow();
         var monthViewWindow = new MonthViewWindow();
         var yearViewWindow = new YearViewWindow();
+        var NotificationHistoryWindow = new NotificationHistoryWindow(notificationService);
 
         var dashboardController = new DashboardController(widgetManager, dashboardWindow);
 
         // Layout
         var top = Toplevel.Create();
         var sidebarView = new SidebarView(commandRegistry);
+        var manager = new NotificationManager(notificationService);
 
         var mainContent = new FrameView
         {
@@ -118,12 +123,17 @@ public static class Program
             mainContent,
             commandRegistry,
             sidebarController,
+            notificationHistoryController,
             appState,
             updateStatus
         );
 
         // Register commands + load sidebar
-        appController.RegisterCommands(taskController, dashboardController);
+        appController.RegisterCommands(
+            taskController,
+            dashboardController,
+            notificationHistoryController
+        );
         sidebarView.LoadCommands();
 
         // Menu bar
